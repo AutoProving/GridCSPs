@@ -46,7 +46,7 @@ void printHConstraints(Constraint* hConstraints, int i, int j);
 void printLCInstance(LCInstance* instance); 
 
 
-void rowToLevel(LCInstance* instance, int i, ODD* resultingODD); // Takes an instance of the List Coloring problem and constructs an
+void rowToODD(LCInstance* instance, int i, ODD* resultingODD); // Takes an instance of the List Coloring problem and constructs an
 					     			 // ODD accepting precisely those sequences of colors which are 
 								 // horizontally compatible
 					      
