@@ -27,8 +27,8 @@ typedef struct{
 	AlphabetMap** IntermediateColors;
 	AlphabetMap** FinalColors;
 	ColorMap** colorMap; // Converts IntermediateColors into FinalColors
-	Constraint vConstraints;
-	Constraint hConstraints;
+	Constraint** vConstraints;
+	Constraint** hConstraints;
 } LCInstance;
 
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j);
