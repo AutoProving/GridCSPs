@@ -18,7 +18,7 @@ typedef struct{
 
 typedef struct{
 	int nConstraints;
-	ColorPair** pairs; // sorted vectors of constraints
+	ColorPair* pairs; // sorted vectors of constraints
 } Constraint; 
 
 typedef struct{
