@@ -21,16 +21,16 @@ void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i
     }
 
     //??? Bind read integer to sizeAlphabet
-    sscanf(line, "%d", c, &intermediateColors[i][j]->sizeAlphabet);
+    sscanf(line, "%d", &intermediateColors->sizeAlphabet);
 
-    intermediateColors[i][j]->S2N = malloc(intermediateColors[i][j]->sizeAlphabet * sizeof(int));
-    intermediateColors[i][j]->N2S = malloc(intermediateColors[i][j]->sizeAlphabet * sizeof(char*));
+    intermediateColors->S2N = malloc(intermediateColors->sizeAlphabet * sizeof(int));
+    intermediateColors->N2S = malloc(intermediateColors->sizeAlphabet * sizeof(char*));
 
-    for(int k=0; k< &intermediateColors->sizeAlphabet; k++){
+    for(int k=0; k< intermediateColors->sizeAlphabet; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
-               intermediateColors[i][j]->N2S[k] = malloc(sizeof(line));
-               sscanf(line, "%d %s", &intermediateColors[i][j]->S2N[k], intermediateColors[i][j]->N2S[k]);
+               intermediateColors->N2S[k] = malloc(sizeof(line));
+               sscanf(line, "%d %s", &intermediateColors->S2N[k], intermediateColors->N2S[k]);
                break;
             }
         }
@@ -54,16 +54,16 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
     }
 
     //??? bind read integer to sizeAlphabet
-    sscanf(line, "%d", c, &finalColors[i][j]->sizeAlphabet);
+    sscanf(line, "%d", &finalColors->sizeAlphabet);
 
-    finalColors[i][j]->S2N = malloc(finalColors[i][j]->sizeAlphabet * sizeof(int));
-    finalColors[i][j]->N2S = malloc(finalColors[i][j]->sizeAlphabet * sizeof(char*));
+    finalColors->S2N = malloc(finalColors->sizeAlphabet * sizeof(int));
+    finalColors->N2S = malloc(finalColors->sizeAlphabet * sizeof(char*));
 
-    for(int k=0; k< &finalColors[i][j]->sizeAlphabet; k++){
+    for(int k=0; k< finalColors->sizeAlphabet; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
-                finalColors[i][j]->N2S[i] = malloc(sizeof(line));
-                sscanf(line, "%d %s", &finalColors[i][j]->S2N[k], finalColors[i][j]->N2S[k]);
+                finalColors->N2S[i] = malloc(sizeof(line));
+                sscanf(line, "%d %s", &finalColors->S2N[k], finalColors->N2S[k]);
                 break;
             }
         }
@@ -87,15 +87,15 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
     }
 
     //??? Bind read integer to nColors
-    sscanf(line, "%d", c, &colorMap[i][j]->nColors);
+    sscanf(line, "%d", &colorMap->nColors);
 
-    colorMap[i][j]->map = malloc(colorMap[i][j]->nColors * sizeof(int));
+    colorMap->map = malloc(colorMap->nColors * sizeof(int));
     int m, n;
-    for(int k=0; k<&colorMap[i][j]->nColors; k++){
+    for(int k=0; k<colorMap->nColors; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
                 //???
-                sscanf(line, "%d %d", m, n);
+                sscanf(line, "%d %d", &m, &n);
                 colorMap->map[m] = n;
                 break;
             }
@@ -109,15 +109,15 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
 void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j){
     char line[64], c[32];
 
-    &vConstraints[i][j]->nConstraints = 2;
-    &vConstraints[i][j]->pairs = malloc(2 * sizeof(int));
+    vConstraints->nConstraints = 2;
+    vConstraints->pairs = malloc(2 * sizeof(int));
     int m, n;
     for(int k=0; k<2; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
-                sscanf(line, "%d %d", m, n);
-                &vConstraints[i][j]->pairs[i].color1 = m;
-                &vConstraints[i][j]->pairs[i].color2 = n;
+                sscanf(line, "%d %d", &m, &n);
+                vConstraints->pairs[i].color1 = m;
+                vConstraints->pairs[i].color2 = n;
                 break;
             }
         }
@@ -127,15 +127,15 @@ void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j){
 void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
     char line[64], c[32];
 
-    &hConstraints[i][j]->nConstraints = 2;
-    &hConstraints[i][j]->pairs = malloc(2 * sizeof(int));
+    hConstraints->nConstraints = 2;
+    hConstraints->pairs = malloc(2 * sizeof(int));
     int m, n;
     for(int k=0; k<2; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
-                sscanf(line, "%d %d", m, n);
-                &hConstraints[i][j]->pairs[i].color1 = m;
-                &hConstraints[i][j]->pairs[i].color2 = n;
+                sscanf(line, "%d %d", &m, &n);
+                hConstraints->pairs[i].color1 = m;
+                hConstraints->pairs[i].color2 = n;
                 break;
             }
         }
@@ -143,38 +143,40 @@ void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
 }
 
 void readLCInstance(char* filename, LCInstance* instance){
-    File *reader = fopen(filename, "r");
-    char line[64], c[32];
+    FILE *reader = fopen(filename, "r");
+    char line[64], c[32], needle[64];
 
     while(fgets(line, sizeof(line), reader)){
         char *keywordPosition = strstr(line, "LIST_COLORING");
         char *commentPosition = strstr(line, "//");
         if(keywordPosition != NULL){
-            if(commentPosition == NULL || keyWordPosition < commentPosition){
+            if(commentPosition == NULL || keywordPosition < commentPosition){
                 break;
             }
         }
     }
 
     //??? Bind read integers to nRows and nColumns
-    sscanf(line, "%d %d", c, &instance->nRows, &instance->nColumns);
+    sscanf(line, "%d %d", &instance->nRows, &instance->nColumns);
 
     //??? Allocate size of structs
     instance->IntermediateColors = malloc(instance->nRows * sizeof(AlphabetMap));
-    instance->finalColors = malloc(instance->nRows * sizeof(AlphabetMap));
-    instance->colormap = malloc(instance->nRows * sizeof(ColorMap));
+    instance->FinalColors = malloc(instance->nRows * sizeof(AlphabetMap));
+    instance->colorMap = malloc(instance->nRows * sizeof(ColorMap));
+
 
     for(int i=0; i<instance->nRows; i++){
 
         //??? Allocate size of structs
-        instance->IntermediateColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap))
-        instance->finalColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap));
-        instance->colormap[i] = malloc(instance->nColumns * sizeof(ColorMap));
+        instance->IntermediateColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap));
+        instance->FinalColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap));
+        instance->colorMap[i] = malloc(instance->nColumns * sizeof(ColorMap));
 
         for(int j=0; j<instance->nColumns; j++){
 
             while(fgets(line, sizeof(line), reader)){
-                char *keyWordPosition = strstr(line, ("COLOR_LISTS %d %d", i, j));
+                sprintf(needle, "COLOR_LISTS %d %d", i, j);
+                char *keyWordPosition = strstr(line, needle);
                 char *commentPosition = strstr(line, "//");
                 if(keyWordPosition != NULL){
                     if(commentPosition == NULL || keyWordPosition < commentPosition){
@@ -182,9 +184,19 @@ void readLCInstance(char* filename, LCInstance* instance){
                     }
                 }
             }
-            readIntermediateColors(reader, &instance->IntermediateColors, i, j);
-            readFinalMap(reader, &instance->FinalColors, i, j);
-            readColorMap(reader, &instance->colorMap, i, j);
+
+            AlphabetMap IntermediateColors;
+            AlphabetMap FinalColors;
+            ColorMap colorMap;
+
+
+            readIntermediateColors(reader, &IntermediateColors, i, j);
+            readFinalMap(reader, &FinalColors, i, j);
+            readColorMap(reader, &colorMap, i, j);
+
+            instance->IntermediateColors[i][j] = IntermediateColors;
+            instance->FinalColors[i][j] = FinalColors;
+            instance->colorMap[i][j] = colorMap;
         }
     }
 
@@ -196,7 +208,8 @@ void readLCInstance(char* filename, LCInstance* instance){
         for(int j=0; j<instance->nColumns; j++){
 
             while(fgets(line, sizeof(line), reader)){
-                char *keyWordPosition = strstr(line, ("VERTICAL_CONSTRAINTS %d %d", i, j));
+                sprintf(needle, "VERTICAL_CONSTRAINTS %d %d", i, j);
+                char *keyWordPosition = strstr(line, needle);
                 char *commentPosition = strstr(line, "//");
                 if(keyWordPosition != NULL){
                     if(commentPosition == NULL || keyWordPosition < commentPosition){
@@ -204,7 +217,11 @@ void readLCInstance(char* filename, LCInstance* instance){
                     }
                 }
             }
-            readVConstraints(reader, &instance->vConstraints, i, j);
+            Constraint vConstraints;
+
+            readVConstraints(reader, &vConstraints, i, j);
+
+            instance->vConstraints[i][j] = vConstraints;
         }
 
     }
@@ -216,7 +233,8 @@ void readLCInstance(char* filename, LCInstance* instance){
 
         for(int j=0; j<instance->nColumns-1; j++){
             while(fgets(line, sizeof(line), reader)){
-                char *keyWordPosition = strstr(line, ("HORIZONTAL_CONSTRAINTS %d %d", i, j));
+                sprintf(needle, "HORIZONTAL_CONSTRAINTS %d %d", i, j);
+                char *keyWordPosition = strstr(line, needle);
                 char *commentPosition = strstr(line, "//");
                 if(keyWordPosition != NULL){
                     if(commentPosition == NULL || keyWordPosition < commentPosition){
@@ -224,11 +242,11 @@ void readLCInstance(char* filename, LCInstance* instance){
                     }
                 }
             }
-            readHConstraints(reader, &instance->hConstraints, i, j);
+            Constraint hConstraints;
+
+            readHConstraints(reader, &hConstraints, i, j);
+
+            instance->hConstraints[i][j] = hConstraints;
         }
     }
-
-
-
-
 }
