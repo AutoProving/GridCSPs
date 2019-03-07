@@ -107,11 +107,39 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
 }
 
 void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j){
+    char line[64], c[32];
 
+    &vConstraints[i][j]->nConstraints = 2;
+    &vConstraints[i][j]->pairs = malloc(2 * sizeof(int));
+    int m, n;
+    for(int k=0; k<2; k++){
+        while(fgets(line, sizeof(line), reader)){
+            if(line != NULL){
+                sscanf(line, "%d %d", m, n);
+                &vConstraints[i][j]->pairs[i].color1 = m;
+                &vConstraints[i][j]->pairs[i].color2 = n;
+                break;
+            }
+        }
+    }
 }
 
 void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
+    char line[64], c[32];
 
+    &hConstraints[i][j]->nConstraints = 2;
+    &hConstraints[i][j]->pairs = malloc(2 * sizeof(int));
+    int m, n;
+    for(int k=0; k<2; k++){
+        while(fgets(line, sizeof(line), reader)){
+            if(line != NULL){
+                sscanf(line, "%d %d", m, n);
+                &hConstraints[i][j]->pairs[i].color1 = m;
+                &hConstraints[i][j]->pairs[i].color2 = n;
+                break;
+            }
+        }
+    }
 }
 
 void readLCInstance(char* filename, LCInstance* instance){
@@ -159,16 +187,46 @@ void readLCInstance(char* filename, LCInstance* instance){
             readColorMap(reader, &instance->colorMap, i, j);
         }
     }
-    instance->vConstraints.nConstraints = (instance->nRows - 1) * instance->nColumns;
-    instance->vConstraints.pairs = malloc()
-    for(int i=0; i<instance->nRows; i++){
+
+    instance->vConstraints = malloc((instance->nRows-1) * sizeof(int));
+    for(int i=0; i<instance->nRows-1; i++){
+
+        instance->vConstraints[i] = malloc((instance->nColumns) * sizeof(int));
+
         for(int j=0; j<instance->nColumns; j++){
+
+            while(fgets(line, sizeof(line), reader)){
+                char *keyWordPosition = strstr(line, ("VERTICAL_CONSTRAINTS %d %d", i, j));
+                char *commentPosition = strstr(line, "//");
+                if(keyWordPosition != NULL){
+                    if(commentPosition == NULL || keyWordPosition < commentPosition){
+                        break;
+                    }
+                }
+            }
             readVConstraints(reader, &instance->vConstraints, i, j);
         }
 
     }
 
-    readHConstraints(reader, &instance->hConstraints, i, j);
+    instance->hConstraints = malloc(instance->nRows * sizeof(int));
+    for(int i=0; i<instance->nRows; i++){
+
+        instance->hConstraints[i] = malloc((instance -> nColumns-1) * sizeof(int));
+
+        for(int j=0; j<instance->nColumns-1; j++){
+            while(fgets(line, sizeof(line), reader)){
+                char *keyWordPosition = strstr(line, ("HORIZONTAL_CONSTRAINTS %d %d", i, j));
+                char *commentPosition = strstr(line, "//");
+                if(keyWordPosition != NULL){
+                    if(commentPosition == NULL || keyWordPosition < commentPosition){
+                        break;
+                    }
+                }
+            }
+            readHConstraints(reader, &instance->hConstraints, i, j);
+        }
+    }
 
 
 
