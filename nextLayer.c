@@ -4,7 +4,7 @@ void nextLayer(LCInstance *instance, int i, int j, ODD *odd, Layer *layer)
 {
 }
 
-//return symbol a iff every transition leading to state l at the right frontier of layer is equal to a
+//return symbol a iff every transition leading to state l at the right frontier of layer is equal to a,
 //else error/exception
 NumSymbol memo(State l, Layer *layer)
 {
@@ -57,23 +57,25 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
             // Found c
             if (ph.color1 == m)
             {
-
+                int c = ph.color2;
+                int notfoundB = 1;
                 //Find (l', b, r') in over.transitions.set such that (b, c) is in V_(i-1, j)
-                for (t = 0; t < up->transitions.nTransitions; t++)
+                for (int t = 0; notfoundB && t < up->transitions.nTransitions; t++)
                 {
 
                     //Then find the symbol equal to the second element
-                    for (int z = 0; z < instance->vConstraints[i - 1][j].nConstraints; z++)
+                    for (int z = 0; notfoundB && z < instance->vConstraints[i - 1][j].nConstraints; z++)
                     {
                         ColorPair pv = instance->vConstraints[i - 1][j].pairs[z];
 
                         //FOUND b
-                        if (pv.color2 == ph.color2)
+                        if (pv.color2 == c)
                         {
-                            result->transitions.set[result->transitions.nTransitions].s1 = l;                         //?
-                            result->transitions.set[result->transitions.nTransitions].a = ph.color2;                  //?
-                            result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[t].s2; // not sure
+                            result->transitions.set[result->transitions.nTransitions].s1 = l;                           //?
+                            result->transitions.set[result->transitions.nTransitions].a = c;                            //?
+                            result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[t].s2;   // not sure
                             ++result->transitions.nTransitions;
+                            notfoundB = 0;
                         }
                     }
                 }
