@@ -18,7 +18,7 @@ typedef struct{
 
 typedef struct{
 	int nConstraints;
-	ColorPair** pairs; // sorted vectors of constraints
+	ColorPair* pairs; // sorted vectors of constraints
 } Constraint; 
 
 typedef struct{
@@ -27,8 +27,8 @@ typedef struct{
 	AlphabetMap** IntermediateColors;
 	AlphabetMap** FinalColors;
 	ColorMap** colorMap; // Converts IntermediateColors into FinalColors
-	Constraint vConstraints;
-	Constraint hConstraints;
+	Constraint** vConstraints;
+	Constraint** hConstraints;
 } LCInstance;
 
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j);
