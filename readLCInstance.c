@@ -20,7 +20,7 @@ void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i
         }
     }
 
-    //???
+    //??? Bind read integer to sizeAlphabet
     sscanf(line, "%d", c, &intermediateColors[i][j]->sizeAlphabet);
 
     intermediateColors[i][j]->S2N = malloc(intermediateColors[i][j]->sizeAlphabet * sizeof(int));
@@ -53,7 +53,7 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
         }
     }
 
-    //???
+    //??? bind read integer to sizeAlphabet
     sscanf(line, "%d", c, &finalColors[i][j]->sizeAlphabet);
 
     finalColors[i][j]->S2N = malloc(finalColors[i][j]->sizeAlphabet * sizeof(int));
@@ -68,11 +68,41 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
             }
         }
     }
-    
+
 
 }
 
-void readColorMap(FILE* reader, ColorMap* colorMAp, int i, int j){
+void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
+
+    char line[64], c[32];
+    while(fgets(line, sizeof(line), reader)) {
+        char *keywordPosition = strstr(line, "COLOR_MAP");
+        char *commentPosition = strstr(line, "//");
+
+        if(keywordPosition != NULL){
+            if(commentPosition == NULL || keywordPosition < commentPosition){
+                break;
+            }
+        }
+    }
+
+    //??? Bind read integer to nColors
+    sscanf(line, "%d", c, &colorMap[i][j]->nColors);
+
+    colorMap[i][j]->map = malloc(colorMap[i][j]->nColors * sizeof(int));
+    int m, n;
+    for(int k=0; k<&colorMap[i][j]->nColors; k++){
+        while(fgets(line, sizeof(line), reader)){
+            if(line != NULL){
+                //???
+                sscanf(line, "%d %d", m, n);
+                colorMap->map[m] = n;
+                break;
+            }
+        }
+    }
+
+
 
 }
 
@@ -98,16 +128,17 @@ void readLCInstance(char* filename, LCInstance* instance){
         }
     }
 
-    //???
+    //??? Bind read integers to nRows and nColumns
     sscanf(line, "%d %d", c, &instance->nRows, &instance->nColumns);
 
-    //???
+    //??? Allocate size of structs
     instance->IntermediateColors = malloc(instance->nRows * sizeof(AlphabetMap));
     instance->finalColors = malloc(instance->nRows * sizeof(AlphabetMap));
     instance->colormap = malloc(instance->nRows * sizeof(ColorMap));
 
     for(int i=0; i<instance->nRows; i++){
 
+        //??? Allocate size of structs
         instance->IntermediateColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap))
         instance->finalColors[i] = malloc(instance->nColumns * sizeof(AlphabetMap));
         instance->colormap[i] = malloc(instance->nColumns * sizeof(ColorMap));
@@ -128,8 +159,15 @@ void readLCInstance(char* filename, LCInstance* instance){
             readColorMap(reader, &instance->colorMap, i, j);
         }
     }
+    instance->vConstraints.nConstraints = (instance->nRows - 1) * instance->nColumns;
+    instance->vConstraints.pairs = malloc()
+    for(int i=0; i<instance->nRows; i++){
+        for(int j=0; j<instance->nColumns; j++){
+            readVConstraints(reader, &instance->vConstraints, i, j);
+        }
 
-    readVConstraints(reader, &instance->vConstraints, i, j);
+    }
+
     readHConstraints(reader, &instance->hConstraints, i, j);
 
 
