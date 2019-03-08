@@ -1,7 +1,7 @@
 // Copyright 2019 Mateus de Oliveira Oliveira
 // This file is licensed under MIT License, as specified in the file LISENSE located at the root folder of this repository.
 
-#include "odd.h"
+#include "/home/andreberge/Documents/INF236-ODDs/ODDs/odd.h"
 
 ///////////////////// List Coloring Instance Type //////////////
 
@@ -38,12 +38,12 @@ void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j);
 void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j);
 void readLCInstance(char* filename, LCInstance* instance); 
 
-void printIntermediateColors(AlphabetMap* intermediateColors, int i, int j);
-void printFinalMap(AlphabetMap* finalColors, int i, int j);
-void printColorMap(ColorMap* colorMAp, int i, int j);
-void printVConstraints(Constraint* vConstraints, int i, int j);
-void printHConstraints(Constraint* hConstraints, int i, int j);
-void printLCInstance(LCInstance* instance); 
+void printIntermediateColors(FILE* f, AlphabetMap* intermediateColors, int i, int j);
+void printFinalMap(FILE* f, AlphabetMap* finalColors, int i, int j);
+void printColorMap(FILE* f, ColorMap* colorMap, int i, int j);
+void printVConstraints(FILE* f, Constraint* vConstraints, int i, int j);
+void printHConstraints(FILE* f, Constraint* hConstraints, int i, int j);
+void printLCInstance(char* filename, LCInstance* instance); 
 
 
 void rowToODD(LCInstance* instance, int i, ODD* resultingODD); // Takes an instance of the List Coloring problem and constructs an
