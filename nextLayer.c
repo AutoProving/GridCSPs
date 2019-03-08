@@ -27,7 +27,7 @@ NumSymbol memo(State l, Layer *layer)
     return a;
 }
 
-void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, AlphabetMap **map, int i, int j)
+void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, int i, int j)
 {
     result->leftStates = left->leftStates;
     result->rightStates = up->rightStates;
@@ -35,7 +35,7 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
     result->finalStates = up->finalStates;
     result->initialFlag = up->initialFlag;
     result->finalFlag = up->finalFlag;
-    result->map = map[i][j];
+    
 
     result->transitions.nTransitions = 0;
 
