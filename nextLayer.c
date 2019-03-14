@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "listColoring.h"
 
 void nextLayer(LCInstance *instance, int i, int j, ODD *odd, Layer *layer)
@@ -41,27 +42,28 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
     result->transitions.nTransitions = 0;
 
     //Assume this is the size for now
-    result->transitions.set = malloc(up->transitions.nTransitions * left->transitions.nTransitions);
+    result->transitions.set = malloc(up->transitions.nTransitions);
 
     for(int x = 0; x < instance->hConstraints[i][j-1].nConstraints; x++)
     {
-        NumSymbol a = instance->hConstraints[i][j-1].c2;
+        NumSymbol a = instance->hConstraints[i][j-1].pairs[x].color2;
         for(int y = 0; y < instance->vConstraints[i-1][j].nConstraints; y++)
         {
-            NumSymbol b = instance->vConstraints[i-1][j].c2;
+            NumSymbol b = instance->vConstraints[i-1][j].pairs[y].color2;
             if (a == b) {
                 for(int z = 0; z < up->transitions.nTransitions; z++)
                 {
                     if (b == up->transitions.set[z].a) {
-                        for(int w = 0; w < left->transitions.nTrasitions; w++)
+                        for(int w = 0; w < left->transitions.nTransitions; w++)
                         {
                             if (left->transitions.set[w].s1 == up->transitions.set[w].s1
                                     && left->transitions.set[w].s2 == up->transitions.set[w].s2
-                                    && left->transitions.set[w].a == instance->hConstraints[i][j-1].c1) 
+                                    && left->transitions.set[w].a == instance->hConstraints[i][j-1].pairs[x].color1) 
                             {
-                                result->transitions.set[result->transitions.nTransitions].s1 = memo(instance->hConstraints[i][j-1].c1); //???
+                                result->transitions.set[result->transitions.nTransitions].s1 = memo(instance->hConstraints[i][j-1].pairs[x].color1); //???
                                 result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[w].s2;
-                                 result->transitions.set[result->transitions.nTransitions].a = b;
+                                result->transitions.set[result->transitions.nTransitions].a = b;
+                                result->transitions.nTransitions++;
                             }
                             
                         }
