@@ -15,17 +15,13 @@ NumSymbol memo(State l, Layer *layer)
 
     for (int i = 0; i < layer->transitions.nTransitions; i++)
     {
-        if (first && layer->transitions.set[i].s2 == l)
+        if (layer->transitions.set[i].s2 == l)
         {
-            a = layer->transitions.set[i].a;
-        }
-        else if (layer->transitions.set[i].s2 == l && a != layer->transitions.set[i].a)
-        {
-            exit(-1);
+            return layer->transitions.set[i].a;
         }
     }
 
-    return a;
+    exit(-1);
 }
 
 void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, int i, int j)
@@ -37,111 +33,43 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
     result->initialFlag = left->initialFlag;
     result->finalFlag = up->finalFlag;
     result->map = instance->FinalColors[i][j]; // ?
-    
 
     result->transitions.nTransitions = 0;
+
+    //assume i != 0.
 
     //Assume this is the size for now
     result->transitions.set = malloc(up->transitions.nTransitions);
 
-    for(int x = 0; x < instance->hConstraints[i][j-1].nConstraints; x++)
-    {
-        NumSymbol a = instance->hConstraints[i][j-1].pairs[x].color2;
-        for(int y = 0; y < instance->vConstraints[i-1][j].nConstraints; y++)
-        {
-            NumSymbol b = instance->vConstraints[i-1][j].pairs[y].color2;
-            if (a == b) {
-                for(int z = 0; z < up->transitions.nTransitions; z++)
-                {
-                    if (b == up->transitions.set[z].a) {
-                        for(int w = 0; w < left->transitions.nTransitions; w++)
-                        {
-                            if (left->transitions.set[w].s1 == up->transitions.set[w].s1
-                                    && left->transitions.set[w].s2 == up->transitions.set[w].s2
-                                    && left->transitions.set[w].a == instance->hConstraints[i][j-1].pairs[x].color1) 
-                            {
-                                result->transitions.set[result->transitions.nTransitions].s1 = memo(instance->hConstraints[i][j-1].pairs[x].color1); //???
-                                result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[w].s2;
+    for (int transIndex = 0; transIndex < up->transitions.nTransitions; transIndex++) {
+
+        NumSymbol a = up->transitions.set[transIndex].a;
+
+        for (int colorIndex = 0; colorIndex < instance->IntermediateColors[i][j].sizeAlphabet; colorIndex++) {
+
+            NumSymbol b = instance->IntermediateColors[i][j].S2N[colorIndex];
+
+            for (int vertical = 0; vertical < instance->vConstraints[i-1][j].nConstraints; vertical++) {
+                if (instance->vConstraints[i-1][j].pairs[vertical].color1 == a && instance->vConstraints[i-1][j].pairs[vertical].color2 == b) {
+                    
+                    if (j == 0) {
+                        result->transitions.set[result->transitions.nTransitions].s1 = up->transitions.set[transIndex].s1;
+                        result->transitions.set[result->transitions.nTransitions].a = b;
+                        result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[transIndex].s2;
+                        result->transitions.nTransitions++;
+                    } else {
+                        NumSymbol m = memo(up->transitions.set[transIndex].s1, left);
+                        for (int horisontal = 0; horisontal < instance->hConstraints[i][j-1].nConstraints; horisontal++) {
+                            if (instance->hConstraints[i][j-1].pairs[horisontal].color1 == m && instance->hConstraints[i][j-1].pairs[horisontal].color2 == b) {
+                                result->transitions.set[result->transitions.nTransitions].s1 = up->transitions.set[transIndex].s1;
                                 result->transitions.set[result->transitions.nTransitions].a = b;
+                                result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[transIndex].s2;
                                 result->transitions.nTransitions++;
                             }
-                            
                         }
-                        
-                    }
-                    
-                }
-                
+                    }   
+                }   
             }
-        
-            
         }
-        
     }
-
-
-
-
-    //result->transitions = {(l, c, r): (memo(l ,left), c) element of H_(i, j-1) exists an (l', b, r')
-    //element over over.transitions.set such that (b, c) element of V_(i-1, j)
-    // for (int y = 0; y < left->leftStates.nStates; y++)
-    // {
-    //     State l = left->leftStates.set[y];
-    //     NumSymbol m = memo(l, left);
-
-    //     //First find for which index H_(i, j-1) is equal to memo(l, left).
-    //     for (int x = 0; x < instance->hConstraints[i][j - 1].nConstraints; x++)
-    //     {
-    //         ColorPair ph = instance->hConstraints[i][j - 1].pairs[x];
-
-    //         // Found c
-    //         if (ph.color1 == m)
-    //         {
-    //             int c = ph.color2;
-    //             int notfoundB = 1;
-    //             //Find (l', b, r') in over.transitions.set such that (b, c) is in V_(i-1, j)
-    //             for (int t = 0; notfoundB && t < up->transitions.nTransitions; t++)
-    //             {
-
-    //                 //Then find the symbol equal to the second element
-    //                 for (int z = 0; notfoundB && z < instance->vConstraints[i - 1][j].nConstraints; z++)
-    //                 {
-    //                     ColorPair pv = instance->vConstraints[i - 1][j].pairs[z];
-
-    //                     //FOUND b
-    //                     if (pv.color2 == c)
-    //                     {
-    //                         result->transitions.set[result->transitions.nTransitions].s1 = l;                           //?
-    //                         result->transitions.set[result->transitions.nTransitions].a = c;                            //?
-    //                         result->transitions.set[result->transitions.nTransitions].s2 = up->transitions.set[t].s2;   // not sure
-    //                         ++result->transitions.nTransitions;
-    //                         notfoundB = 0;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 }
-
-/*
-typedef struct{
-	int nRows;
-	int nColumns;
-	AlphabetMap** IntermediateColors;
-	AlphabetMap** FinalColors;
-	ColorMap** colorMap; // Converts IntermediateColors into FinalColors
-	Constraint** vConstraints;
-	Constraint** hConstraints;
-} LCInstance;
-
-typedef struct{
-	int color1;
-	int color2; 
-} ColorPair; 
-
-typedef struct{
-	int nConstraints;
-	ColorPair* pairs; // sorted vectors of constraints
-} Constraint; 
-*/
