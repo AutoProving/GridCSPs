@@ -22,7 +22,7 @@ void addTransitions(LCInstance* instance, int i, ODD* resultingODD) {
 }
 
 
-// TODO: What about final transitions
+// TODO: What about final and init transitions
 void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingODD) {
     if (j == 0) { //Initial transitions goes from 0
         resultingODD->layerSequence[j].transitions.nTransitions = instance->IntermediateColors[i][j].sizeAlphabet;
@@ -30,11 +30,9 @@ void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingOD
                 sizeof(Transition) * resultingODD->layerSequence[j].transitions.nTransitions);
 
         for (int trans = 0; trans < instance->IntermediateColors[i][j].sizeAlphabet; trans++) {
-            Transition transition;
-            transition.s1 = 0;
-            transition.a = trans;
-            transition.s2 = trans;
-            resultingODD->layerSequence[j].transitions.set[trans] = transition;
+            resultingODD->layerSequence[j].transitions.set[trans].s1 = 0;
+            resultingODD->layerSequence[j].transitions.set[trans].a = trans;
+            resultingODD->layerSequence[j].transitions.set[trans].s2 = trans;
         }
     } else { // All other transitions
         resultingODD->layerSequence[j].transitions.nTransitions = instance->hConstraints[i][j].nConstraints;
@@ -42,11 +40,9 @@ void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingOD
                 sizeof(Transition) * resultingODD->layerSequence[j].transitions.nTransitions);
 
         for (int trans = 0; trans < resultingODD->layerSequence[j].transitions.nTransitions; trans++) {
-            Transition transition;
-            transition.s1 = instance->hConstraints[i][j].pairs[trans].color1;
-            transition.a = instance->hConstraints[i][j].pairs[trans].color2;
-            transition.s2 = instance->hConstraints[i][j].pairs[trans].color2;
-            resultingODD->layerSequence[j].transitions.set[trans] = transition;
+            resultingODD->layerSequence[j].transitions.set[trans].s1 = instance->hConstraints[i][j].pairs[trans].color1;
+            resultingODD->layerSequence[j].transitions.set[trans].a = instance->hConstraints[i][j].pairs[trans].color2;
+            resultingODD->layerSequence[j].transitions.set[trans].s2 = instance->hConstraints[i][j].pairs[trans].color2;
         }
     }
 }
