@@ -1,4 +1,4 @@
-//#include "listColoring.h"
+#include "listColoring.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -66,6 +66,7 @@ void printLCInstance(char* filename, LCInstance* instance)
 			printColorMap(f, instance->colorMap[index], i, j);
 		}	
 	}
+    fprintf(f, "%s", "\n");
 	//Vertical Constraints
 	index = 0;
 	for (int i = 0; i < instance->nRows - 1; i++)
@@ -76,7 +77,8 @@ void printLCInstance(char* filename, LCInstance* instance)
 			printVConstraints(f, instance->vConstraints[index], i, j);
 		}
 	}
-
+    
+    fprintf(f, "%s", "\n");
 	//Horizontal Constraints	
 	for (int i = 0; i < instance->nRows; i++)
 	{
