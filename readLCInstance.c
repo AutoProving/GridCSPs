@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-//#include "listColoring.h"
+#include "listColoring.h"
 
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j){
 
@@ -144,7 +144,7 @@ void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
 
 void readLCInstance(char* filename, LCInstance* instance){
     FILE *reader = fopen(filename, "r");
-    char line[64], c[32], needle[64];
+    char line[64], c[128], needle[64];
 
     while(fgets(line, sizeof(line), reader)){
         char *keywordPosition = strstr(line, "LIST_COLORING");
@@ -217,11 +217,9 @@ void readLCInstance(char* filename, LCInstance* instance){
                     }
                 }
             }
-            Constraint vConstraints;
 
-            readVConstraints(reader, &vConstraints, i, j);
+            readVConstraints(reader, &(instance->vConstraints[i][j]), i, j);
 
-            instance->vConstraints[i][j] = vConstraints;
         }
 
     }
@@ -242,11 +240,9 @@ void readLCInstance(char* filename, LCInstance* instance){
                     }
                 }
             }
-            Constraint hConstraints;
 
-            readHConstraints(reader, &hConstraints, i, j);
+            readHConstraints(reader, &instance->hConstraints[i][j], i, j);
 
-            instance->hConstraints[i][j] = hConstraints;
         }
     }
 }

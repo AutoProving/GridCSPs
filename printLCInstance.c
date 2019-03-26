@@ -7,7 +7,7 @@ void printIntermediateColors(FILE* f, AlphabetMap* intermediateColors, int i, in
 {
 	for (int colorIndex = 0; colorIndex < intermediateColors->sizeAlphabet; colorIndex++)
 	{
-		fprintf(f, "%d %s\n", colorIndex, intermediateColors->N2S[colorIndex]);
+		fprintf(f, "%d %s\n", intermediateColors->S2N[colorIndex], intermediateColors->N2S[colorIndex]);
 	}
 }
 
@@ -15,7 +15,7 @@ void printFinalMap(FILE* f, AlphabetMap* finalColors, int i, int j)
 {
 	for (int colorIndex = 0; colorIndex < finalColors->sizeAlphabet; colorIndex++)
 	{
-		fprintf(f, "%d %s\n", colorIndex, finalColors->N2S[colorIndex]);
+		fprintf(f, "%d %s\n", finalColors->S2N[colorIndex], finalColors->N2S[colorIndex]);
 	}
 }
 
@@ -58,12 +58,12 @@ void printLCInstance(char* filename, LCInstance* instance)
 	{
 		for(int j = 0; j < instance->nColumns; j++)
 		{
-			fprintf(f, "COLOR_LISTS %d %d\nINTERMEDIATE_COLORS %d\n", i, j, instance->IntermediateColors[index]->sizeAlphabet);
-			printIntermediateColors(f, instance->IntermediateColors[index], i, j);
-			fprintf(f, "FINAL_COLORS %d\n", instance->FinalColors[index]->sizeAlphabet);
-			printFinalMap(f, instance->FinalColors[index], i, j);
-			fprintf(f, "COLOR_MAP %d\n", instance->colorMap[index]->nColors);
-			printColorMap(f, instance->colorMap[index], i, j);
+			fprintf(f, "\nCOLOR_LISTS %d %d\nINTERMEDIATE_COLORS %d\n", i, j, instance->IntermediateColors[i][j].sizeAlphabet);
+			printIntermediateColors(f, &instance->IntermediateColors[i][j], i, j);
+			fprintf(f, "FINAL_COLORS %d\n", instance->FinalColors[i][j].sizeAlphabet);
+			printFinalMap(f, &instance->FinalColors[i][j], i, j);
+			fprintf(f, "COLOR_MAP %d\n", instance->colorMap[i][j].nColors);
+			printColorMap(f, &instance->colorMap[i][j], i, j);
 		}	
 	}
     fprintf(f, "%s", "\n");
@@ -74,10 +74,12 @@ void printLCInstance(char* filename, LCInstance* instance)
 		for (int j = 0; j < instance->nColumns; j++)
 		{
 			fprintf(f, "VERTICAL_CONSTRAINTS %d %d\n", i, j);
-			printVConstraints(f, instance->vConstraints[index], i, j);
+			printVConstraints(f, &instance->vConstraints[i][j], i, j);
 		}
+            index++;
 	}
-    
+
+    index = 0; 
     fprintf(f, "%s", "\n");
 	//Horizontal Constraints	
 	for (int i = 0; i < instance->nRows; i++)
@@ -85,8 +87,9 @@ void printLCInstance(char* filename, LCInstance* instance)
 		for (int j = 0; j < instance->nColumns - 1; j++)
 		{		
 			fprintf(f, "HORIZONTAL_CONSTRAINTS %d %d\n", i, j);
-			printHConstraints(f, instance->hConstraints[index], i, j);
+			printHConstraints(f, &instance->hConstraints[i][j], i, j);
 		}
+        index++;
 	}
 
 
