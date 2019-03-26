@@ -62,7 +62,7 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
     for(int k=0; k< finalColors->sizeAlphabet; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
-                finalColors->N2S[i] = malloc(sizeof(line));
+                finalColors->N2S[k] = malloc(sizeof(line));
                 sscanf(line, "%d %s", &finalColors->S2N[k], finalColors->N2S[k]);
                 break;
             }
@@ -110,14 +110,14 @@ void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j){
     char line[256], c[32];
 
     vConstraints->nConstraints = 2;
-    vConstraints->pairs = malloc(2 * sizeof(int));
+    vConstraints->pairs = malloc(2 * sizeof(ColorPair));
     int m, n;
     for(int k=0; k<2; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
                 sscanf(line, "%d %d", &m, &n);
-                vConstraints->pairs[i].color1 = m;
-                vConstraints->pairs[i].color2 = n;
+                vConstraints->pairs[k].color1 = m;
+                vConstraints->pairs[k].color2 = n;
                 break;
             }
         }
@@ -128,14 +128,14 @@ void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
     char line[64], c[32];
 
     hConstraints->nConstraints = 2;
-    hConstraints->pairs = malloc(2 * sizeof(int));
+    hConstraints->pairs = malloc(2 * sizeof(ColorPair));
     int m, n;
     for(int k=0; k<2; k++){
         while(fgets(line, sizeof(line), reader)){
             if(line != NULL){
                 sscanf(line, "%d %d", &m, &n);
-                hConstraints->pairs[i].color1 = m;
-                hConstraints->pairs[i].color2 = n;
+                hConstraints->pairs[k].color1 = m;
+                hConstraints->pairs[k].color2 = n;
                 break;
             }
         }
@@ -200,10 +200,10 @@ void readLCInstance(char* filename, LCInstance* instance){
         }
     }
 
-    instance->vConstraints = malloc((instance->nRows-1) * sizeof(int));
+    instance->vConstraints = malloc((instance->nRows-1) * sizeof(Constraint));
     for(int i=0; i<instance->nRows-1; i++){
 
-        instance->vConstraints[i] = malloc((instance->nColumns) * sizeof(int));
+        instance->vConstraints[i] = malloc((instance->nColumns) * sizeof(Constraint));
 
         for(int j=0; j<instance->nColumns; j++){
 
@@ -226,10 +226,10 @@ void readLCInstance(char* filename, LCInstance* instance){
 
     }
 
-    instance->hConstraints = malloc(instance->nRows * sizeof(int));
+    instance->hConstraints = malloc(instance->nRows * sizeof(Constraint));
     for(int i=0; i<instance->nRows; i++){
 
-        instance->hConstraints[i] = malloc((instance -> nColumns-1) * sizeof(int));
+        instance->hConstraints[i] = malloc((instance -> nColumns-1) * sizeof(Constraint));
 
         for(int j=0; j<instance->nColumns-1; j++){
             while(fgets(line, sizeof(line), reader)){
