@@ -1,4 +1,4 @@
-#include "listColoring.h"
+//#include "listColoring.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,7 +7,7 @@ void printIntermediateColors(FILE* f, AlphabetMap* intermediateColors, int i, in
 {
 	for (int colorIndex = 0; colorIndex < intermediateColors->sizeAlphabet; colorIndex++)
 	{
-		fprintf(f, "%d %s", colorIndex, intermediateColors->N2S[colorIndex]);
+		fprintf(f, "%d %s\n", colorIndex, intermediateColors->N2S[colorIndex]);
 	}
 }
 
@@ -15,7 +15,7 @@ void printFinalMap(FILE* f, AlphabetMap* finalColors, int i, int j)
 {
 	for (int colorIndex = 0; colorIndex < finalColors->sizeAlphabet; colorIndex++)
 	{
-		fprintf(f, "%d %s", colorIndex, finalColors->N2S[colorIndex]);
+		fprintf(f, "%d %s\n", colorIndex, finalColors->N2S[colorIndex]);
 	}
 }
 
@@ -23,7 +23,7 @@ void printColorMap(FILE* f, ColorMap* colorMap, int i, int j)
 {	
 	for (int colorIndex = 0; colorIndex < colorMap->nColors; colorIndex++)
 	{
-		fprintf(f, "%d %d", colorIndex, colorMap->map[colorIndex]);
+		fprintf(f, "%d %d\n", colorIndex, colorMap->map[colorIndex]);
 	}
 }
 
@@ -31,7 +31,7 @@ void printVConstraints(FILE* f, Constraint* vConstraints, int i, int j)
 {	
 	for (int constraintIndex = 0; constraintIndex < vConstraints->nConstraints; constraintIndex++)
 	{
-		fprintf(f, "%d %d", vConstraints->pairs[constraintIndex].color1, vConstraints->pairs[constraintIndex].color2);
+		fprintf(f, "%d %d\n", vConstraints->pairs[constraintIndex].color1, vConstraints->pairs[constraintIndex].color2);
 	}
 }
 
@@ -39,7 +39,7 @@ void printHConstraints(FILE* f, Constraint* hConstraints, int i, int j)
 {
 	for (int constraintIndex = 0; constraintIndex < hConstraints->nConstraints; constraintIndex++)
 	{
-		fprintf(f, "%d %d", hConstraints->pairs[constraintIndex].color1, hConstraints->pairs[constraintIndex].color2);
+		fprintf(f, "%d %d\n", hConstraints->pairs[constraintIndex].color1, hConstraints->pairs[constraintIndex].color2);
 	}
 }
 
