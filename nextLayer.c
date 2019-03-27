@@ -5,6 +5,17 @@ void nextLayer(LCInstance *instance, int i, int j, ODD *odd, Layer *layer)
 {
 }
 
+Layer* next_layer(LCInstance *instance, int i, int j, Layer** m) 
+{
+    if (j == 0) {
+        return nextIncrement(instance, NULL, &m[i-1][j], i, j);
+    }
+    else {
+        return nextIncrement(instance, &m[i][j-1], &m[i-1][j], i, j);
+    }
+    
+}
+
 //return symbol a iff every transition leading to state l at the right frontier of layer is equal to a,
 //else error/exception
 NumSymbol memo(State l, Layer *layer)
@@ -24,8 +35,9 @@ NumSymbol memo(State l, Layer *layer)
     exit(-1);
 }
 
-void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, int i, int j)
+Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
 {
+    Layer *result;
     result->leftStates = left->rightStates;
     result->rightStates = up->rightStates;
     result->initialStates = left->initialStates;
@@ -39,7 +51,7 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
     //assume i != 0.
 
     //Assume this is the size for now
-    result->transitions.set = malloc(up->transitions.nTransitions);
+    result->transitions.set = malloc(up->transitions.nTransitions * sizeof(Transition));
 
     for (int transIndex = 0; transIndex < up->transitions.nTransitions; transIndex++) {
 
