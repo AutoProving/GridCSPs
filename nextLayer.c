@@ -32,7 +32,7 @@ void nextIncrement(LCInstance *instance, Layer *left, Layer *up, Layer *result, 
     result->finalStates = up->finalStates;
     result->initialFlag = left->initialFlag;
     result->finalFlag = up->finalFlag;
-    result->map = instance->FinalColors[i][j]; // ?
+    result->map = instance->IntermediateColors[i][j];
 
     result->transitions.nTransitions = 0;
 
