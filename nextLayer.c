@@ -1,11 +1,13 @@
+// Copyright 2019 Markus Ragnhildstveit, Amund Lindberg, Ole Magnus Morken, Guillermo Hoyo Bravo and Josep Barbera Muñoz
+// This file is licensed under MIT License, as specified in the file LISENSE located at the root folder of this repository.
+
 #include <stdlib.h>
 #include "listColoring.h"
 
-void nextLayer(LCInstance *instance, int i, int j, ODD *odd, Layer *layer)
-{
-}
+NumSymbol memo(State l, Layer *layer);
+Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j);
 
-Layer* next_layer(LCInstance *instance, int i, int j, Layer** m) 
+Layer* nextLayer(LCInstance *instance, int i, int j, Layer** m) 
 {
     if (j == 0) {
         return nextIncrement(instance, NULL, &m[i-1][j], i, j);
