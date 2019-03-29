@@ -51,6 +51,6 @@ void rowToODD(LCInstance* instance, int i, ODD* resultingODD); // Takes an insta
 								 // horizontally compatible
 					      
 
-void nextLayer(LCInstance* instance, int i, int j, ODD* odd, Layer* layer); // Constructs next layer. 
+Layer* nextLayer(LCInstance *instance, int i, int j, Layer** m); // Constructs next layer. 
 
 
