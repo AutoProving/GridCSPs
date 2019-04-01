@@ -9,6 +9,7 @@
 //Rewrites file to not contain any comments
 void removeComments(char* filename){
     FILE *reader = fopen(filename, "r");
+    FILE *writer = fopen("commentsRemoved.txt", "w")
     char line[256];
     int substrlength;
 
@@ -18,10 +19,13 @@ void removeComments(char* filename){
 
         if(commentPosition != NULL){
             int position = line - commentPosition;
-            substrlength = strlen(line) - position;
+            substrlength -= position;
         }
-        fprintf(reader, substrlength, line);
+        fprintf(writer, substrlength, line);
     }
+
+    reader.close();
+    writer.close();
 }
 
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j){
@@ -163,7 +167,7 @@ void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
 void readLCInstance(char* filename, LCInstance* instance){
 
     removeComments(filename);
-    FILE *reader = fopen(filename, "r");
+    FILE *reader = fopen("commentsRemoved.txt", "r");
     char line[64], c[128], needle[64];
 
     while(fgets(line, sizeof(line), reader)){
@@ -265,4 +269,6 @@ void readLCInstance(char* filename, LCInstance* instance){
 
         }
     }
+
+    reader.close();
 }
