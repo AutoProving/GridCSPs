@@ -6,6 +6,24 @@
 #include <string.h>
 #include "listColoring.h"
 
+//Rewrites file to not contain any comments
+void removeComments(char* filename){
+    FILE *reader = fopen(filename, "r");
+    char line[256];
+    int substrlength;
+
+    while(fgets(line, sizeof(line), reader)){
+        char *commentPosition = strstr(line, "//");
+        substrlength = strlen(line);
+
+        if(commentPosition != NULL){
+            int position = line - commentPosition;
+            substrlength = strlen(line) - position;
+        }
+        fprintf(reader, substrlength, line);
+    }
+}
+
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j){
 
     char line[256], c[32];
@@ -143,6 +161,8 @@ void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
 }
 
 void readLCInstance(char* filename, LCInstance* instance){
+
+    removeComments(filename);
     FILE *reader = fopen(filename, "r");
     char line[64], c[128], needle[64];
 
