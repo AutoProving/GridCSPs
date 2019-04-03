@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "listColoring.h"
 
 //Rewrites file to not contain any comments
 void removeComments(char* filename){
