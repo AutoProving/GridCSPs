@@ -4,28 +4,36 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "listColoring.h"
 
 //Rewrites file to not contain any comments
 void removeComments(char* filename){
     FILE *reader = fopen(filename, "r");
-    FILE *writer = fopen("commentsRemoved.txt", "w")
+    FILE *writer = fopen("commentsRemoved.txt", "w");
     char line[256];
-    int substrlength;
+    int position;
 
     while(fgets(line, sizeof(line), reader)){
         char *commentPosition = strstr(line, "//");
-        substrlength = strlen(line);
 
-        if(commentPosition != NULL){
-            int position = line - commentPosition;
-            substrlength -= position;
+        //Remove blank lines or line with only comments
+        if(strlen(line) == 1 || commentPosition == line){
+            continue;
         }
-        fprintf(writer, substrlength, line);
+
+        //Remove comment but keep line to be read
+        if(commentPosition != NULL){
+            position = line - commentPosition;
+            fprintf(writer, "%.*s\n", abs(position), line);
+        }
+        //No comment, print whole line
+        else{
+            fprintf(writer, "%s",  line);
+        }
     }
 
-    reader.close();
-    writer.close();
+    int _ = fclose(reader);
+    _ = fclose(writer);
+
 }
 
 void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i, int j){
@@ -33,12 +41,9 @@ void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i
     char line[256], c[32];
     while(fgets(line, sizeof(line), reader)) {
         char *keywordPosition = strstr(line, "INTERMEDIATE_COLORS");
-        char *commentPosition = strstr(line, "//");
 
         if(keywordPosition != NULL){
-            if(commentPosition == NULL || keywordPosition < commentPosition){
-                break;
-            }
+            break;
         }
     }
 
@@ -50,11 +55,10 @@ void readIntermediateColors(FILE* reader, AlphabetMap* intermediateColors, int i
 
     for(int k=0; k< intermediateColors->sizeAlphabet; k++){
         while(fgets(line, sizeof(line), reader)){
-            if(line != NULL){
                intermediateColors->N2S[k] = malloc(sizeof(line));
                sscanf(line, "%d %s", &intermediateColors->S2N[k], intermediateColors->N2S[k]);
                break;
-            }
+
         }
     }
 
@@ -66,12 +70,9 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
     char line[256], c[32];
     while(fgets(line, sizeof(line), reader)) {
         char *keywordPosition = strstr(line, "FINAL_COLORS");
-        char *commentPosition = strstr(line, "//");
 
         if(keywordPosition != NULL){
-            if(commentPosition == NULL || keywordPosition < commentPosition){
-                break;
-            }
+            break;
         }
     }
 
@@ -83,11 +84,10 @@ void readFinalMap(FILE* reader, AlphabetMap* finalColors, int i, int j){
 
     for(int k=0; k< finalColors->sizeAlphabet; k++){
         while(fgets(line, sizeof(line), reader)){
-            if(line != NULL){
                 finalColors->N2S[k] = malloc(sizeof(line));
                 sscanf(line, "%d %s", &finalColors->S2N[k], finalColors->N2S[k]);
                 break;
-            }
+
         }
     }
 
@@ -99,12 +99,9 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
     char line[256], c[32];
     while(fgets(line, sizeof(line), reader)) {
         char *keywordPosition = strstr(line, "COLOR_MAP");
-        char *commentPosition = strstr(line, "//");
 
         if(keywordPosition != NULL){
-            if(commentPosition == NULL || keywordPosition < commentPosition){
-                break;
-            }
+            break;
         }
     }
 
@@ -115,12 +112,10 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
     int m, n;
     for(int k=0; k<colorMap->nColors; k++){
         while(fgets(line, sizeof(line), reader)){
-            if(line != NULL){
-                //???
                 sscanf(line, "%d %d", &m, &n);
                 colorMap->map[m] = n;
                 break;
-            }
+
         }
     }
 
@@ -130,38 +125,76 @@ void readColorMap(FILE* reader, ColorMap* colorMap, int i, int j){
 
 void readVConstraints(FILE* reader, Constraint* vConstraints, int i, int j){
     char line[256], c[32];
-
-    vConstraints->nConstraints = 2;
-    vConstraints->pairs = malloc(2 * sizeof(ColorPair));
     int m, n;
-    for(int k=0; k<2; k++){
-        while(fgets(line, sizeof(line), reader)){
-            if(line != NULL){
-                sscanf(line, "%d %d", &m, &n);
-                vConstraints->pairs[k].color1 = m;
-                vConstraints->pairs[k].color2 = n;
-                break;
-            }
+    int nrOfConstraints = 1;
+
+    vConstraints->pairs = malloc(sizeof(ColorPair));
+
+    while(fgets(line, sizeof(line), reader)) {
+
+        char *keyWordPosition = strstr(line, "CONSTRAINTS");
+        if (keyWordPosition == NULL) {
+            break;
         }
     }
+
+    sscanf(line, "%d %d", &m, &n);
+    vConstraints->pairs[nrOfConstraints-1].color1 = m;
+    vConstraints->pairs[nrOfConstraints-1].color2 = n;
+
+    while(fgets(line, sizeof(line), reader)) {
+
+        char *keyWordPosition = strstr(line, "CONSTRAINTS");
+        if (keyWordPosition != NULL) {
+            break;
+        }
+
+        sscanf(line, "%d %d", &m, &n);
+        nrOfConstraints++;
+        ColorPair* tmp = realloc(vConstraints->pairs, nrOfConstraints * sizeof(ColorPair));
+        vConstraints->pairs = tmp;
+        vConstraints->pairs[nrOfConstraints-1].color1 = m;
+        vConstraints->pairs[nrOfConstraints-1].color2 = n;
+    }
+    vConstraints->nConstraints = nrOfConstraints;
+
 }
 
 void readHConstraints(FILE* reader, Constraint* hConstraints, int i, int j){
-    char line[64], c[32];
-
-    hConstraints->nConstraints = 2;
-    hConstraints->pairs = malloc(2 * sizeof(ColorPair));
+    char line[256], c[32];
     int m, n;
-    for(int k=0; k<2; k++){
-        while(fgets(line, sizeof(line), reader)){
-            if(line != NULL){
-                sscanf(line, "%d %d", &m, &n);
-                hConstraints->pairs[k].color1 = m;
-                hConstraints->pairs[k].color2 = n;
-                break;
-            }
+    int nrOfConstraints = 1;
+
+    hConstraints->pairs = malloc(sizeof(ColorPair));
+
+    while(fgets(line, sizeof(line), reader)) {
+
+        char *keyWordPosition = strstr(line, "CONSTRAINTS");
+        if (keyWordPosition == NULL) {
+            break;
         }
     }
+
+    sscanf(line, "%d %d", &m, &n);
+    hConstraints->pairs[nrOfConstraints-1].color1 = m;
+    hConstraints->pairs[nrOfConstraints-1].color2 = n;
+
+    while(fgets(line, sizeof(line), reader)) {
+
+        char *keyWordPosition = strstr(line, "CONSTRAINTS");
+        if (keyWordPosition != NULL) {
+            break;
+        }
+
+        sscanf(line, "%d %d", &m, &n);
+        nrOfConstraints++;
+        ColorPair* tmp = realloc(hConstraints->pairs, nrOfConstraints * sizeof(ColorPair));
+        hConstraints->pairs = tmp;
+        hConstraints->pairs[nrOfConstraints-1].color1 = m;
+        hConstraints->pairs[nrOfConstraints-1].color2 = n;
+    }
+    hConstraints->nConstraints = nrOfConstraints;
+
 }
 
 void readLCInstance(char* filename, LCInstance* instance){
@@ -172,11 +205,9 @@ void readLCInstance(char* filename, LCInstance* instance){
 
     while(fgets(line, sizeof(line), reader)){
         char *keywordPosition = strstr(line, "LIST_COLORING");
-        char *commentPosition = strstr(line, "//");
+
         if(keywordPosition != NULL){
-            if(commentPosition == NULL || keywordPosition < commentPosition){
-                break;
-            }
+            break;
         }
     }
 
@@ -201,11 +232,9 @@ void readLCInstance(char* filename, LCInstance* instance){
             while(fgets(line, sizeof(line), reader)){
                 sprintf(needle, "COLOR_LISTS %d %d", i, j);
                 char *keyWordPosition = strstr(line, needle);
-                char *commentPosition = strstr(line, "//");
+
                 if(keyWordPosition != NULL){
-                    if(commentPosition == NULL || keyWordPosition < commentPosition){
-                        break;
-                    }
+                    break;
                 }
             }
 
@@ -225,22 +254,18 @@ void readLCInstance(char* filename, LCInstance* instance){
     }
 
     instance->vConstraints = malloc((instance->nRows-1) * sizeof(Constraint));
+    while(fgets(line, sizeof(line), reader)){
+                char *keyWordPosition = strstr(line, "VERTICAL_CONSTRAINTS");
+
+                if(keyWordPosition != NULL){
+                    break;
+                }
+            }
     for(int i=0; i<instance->nRows-1; i++){
 
         instance->vConstraints[i] = malloc((instance->nColumns) * sizeof(Constraint));
 
         for(int j=0; j<instance->nColumns; j++){
-
-            while(fgets(line, sizeof(line), reader)){
-                sprintf(needle, "VERTICAL_CONSTRAINTS %d %d", i, j);
-                char *keyWordPosition = strstr(line, needle);
-                char *commentPosition = strstr(line, "//");
-                if(keyWordPosition != NULL){
-                    if(commentPosition == NULL || keyWordPosition < commentPosition){
-                        break;
-                    }
-                }
-            }
 
             readVConstraints(reader, &(instance->vConstraints[i][j]), i, j);
 
@@ -249,26 +274,17 @@ void readLCInstance(char* filename, LCInstance* instance){
     }
 
     instance->hConstraints = malloc(instance->nRows * sizeof(Constraint));
+
     for(int i=0; i<instance->nRows; i++){
 
-        instance->hConstraints[i] = malloc((instance -> nColumns-1) * sizeof(Constraint));
+        instance->hConstraints[i] = malloc((instance->nColumns-1) * sizeof(Constraint));
 
         for(int j=0; j<instance->nColumns-1; j++){
-            while(fgets(line, sizeof(line), reader)){
-                sprintf(needle, "HORIZONTAL_CONSTRAINTS %d %d", i, j);
-                char *keyWordPosition = strstr(line, needle);
-                char *commentPosition = strstr(line, "//");
-                if(keyWordPosition != NULL){
-                    if(commentPosition == NULL || keyWordPosition < commentPosition){
-                        break;
-                    }
-                }
-            }
 
-            readHConstraints(reader, &instance->hConstraints[i][j], i, j);
+            readHConstraints(reader, &(instance->hConstraints[i][j]), i, j);
 
         }
+
     }
 
-    reader.close();
 }
