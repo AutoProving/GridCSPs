@@ -1,7 +1,7 @@
 // Copyright 2019 Mateus de Oliveira Oliveira
 // This file is licensed under MIT License, as specified in the file LISENSE located at the root folder of this repository.
 
-#include "/home/andreberge/Documents/INF236-ODDs/ODDs/odd.h"
+#include "odd.h"
 
 ///////////////////// List Coloring Instance Type //////////////
 
