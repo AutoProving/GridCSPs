@@ -9,9 +9,13 @@ AlphabetMap *defaultColorMap(void);
 
 int s2n(char *str);
 
-ColorPair *defaultColorPairs();
+ColorPair *verticalColorPairs();
 
 Constraint **buildVerticalMatrix(int rows, int columns);
+
+Constraint **buildHorizontalMatrix(int rows, int columns);
+
+ColorPair *secondCategoryColorPairs();
 
 LCInstance *pigeonholeInstance(int rows, int columns) {
 
@@ -35,36 +39,75 @@ LCInstance *pigeonholeInstance(int rows, int columns) {
 
     pigeon->vConstraints = buildVerticalMatrix(rows, columns);
 
-//    pigeon->vConstraints
+    pigeon->hConstraints = buildHorizontalMatrix(rows, columns);
 
     return pigeon;
 }
 
-int s2n(char *str) {
+Constraint **buildVerticalMatrix(int rows, int columns) {
 
-    if (!strcmp(str, "b"))
-        return 0;
-    if (!strcmp(str, "g"))
-        return 1;
-    if (!strcmp(str, "rr"))
-        return 2;
-    if (!strcmp(str, "bb"))
-        return 3;
-    if (!strcmp(str, "bg"))
-        return 4;
-    if (!strcmp(str, "br"))
-        return 5;
-    if (!strcmp(str, "gb"))
-        return 6;
-    if (!strcmp(str, "gg"))
-        return 7;
-    if (!strcmp(str, "gr"))
-        return 8;
-    else {
-        fprintf(stderr, "Bad input @ s2n().\n");
-        fprintf(stderr, "Input: %s\n", str);
-        exit(EXIT_FAILURE);
+    int i = rows - 1;
+    int j = columns;
+    int numOfConstraints = 12;
+
+    ColorPair *defaultPairs = verticalColorPairs();
+
+    Constraint **vMatrix = malloc((unsigned long) i * sizeof(Constraint *)); // FREE ME
+    for (int x = 0; x < i; ++x) {
+        vMatrix[x] = malloc((unsigned long) j * sizeof(Constraint)); // FREE ME
+        for (int y = 0; y < j; ++y) {
+            vMatrix[x][y].nConstraints = numOfConstraints;
+            vMatrix[x][y].pairs = defaultPairs;
+        }
     }
+    return vMatrix;
+}
+
+Constraint **buildHorizontalMatrix(int rows, int columns) {
+
+    int i = rows;
+    int j = columns - 1;
+
+    Constraint **hMatrix = malloc((unsigned long) i * sizeof(Constraint *)); // FREE ME
+    for (int x = 0; x < i; ++x)
+        hMatrix[x] = malloc((unsigned long) j * sizeof(Constraint)); // FREE ME
+
+    // First Category
+    int firstNum = 3;
+    ColorPair *firstPairs = malloc((unsigned long) firstNum * sizeof(ColorPair)); // FREE ME
+    firstPairs[0] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("bb")};
+    firstPairs[1] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("bg")};
+    firstPairs[2] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("rr")};
+
+    for (int x = 0; x < i; ++x) {
+        hMatrix[x][0].nConstraints = firstNum;
+        hMatrix[x][0].pairs = firstPairs;
+    }
+
+    // Second Category
+    int secondNum = 12;
+    ColorPair *secondPairs = secondCategoryColorPairs();
+
+    for (int x = 0; x < i; ++x) {
+        for (int y = 1; y < j; ++y) {
+            hMatrix[x][y].nConstraints = secondNum;
+            hMatrix[x][y].pairs = secondPairs;
+        }
+    }
+
+    // Third Category
+    int thirdNum = 3;
+    ColorPair *thirdPairs = malloc((unsigned long) thirdNum * sizeof(ColorPair)); // FREE ME
+    thirdPairs[0] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("g")};
+    thirdPairs[1] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("g")};
+    thirdPairs[2] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("g")};
+
+    for (int x = 0; x < i; ++x) {
+        hMatrix[x][j-1].nConstraints = thirdNum;
+        hMatrix[x][j-1].pairs = thirdPairs;
+    }
+
+    return hMatrix;
 }
 
 AlphabetMap *defaultColorMap(void) {
@@ -92,26 +135,7 @@ AlphabetMap *defaultColorMap(void) {
     return defaultMap;
 }
 
-Constraint **buildVerticalMatrix(int rows, int columns) {
-
-    int i = rows - 1;
-    int j = columns + 1;
-    int numOfConstraints = 12;
-
-    ColorPair *defaultPairs = defaultColorPairs();
-
-    Constraint **vMatrix = malloc((unsigned long) i * sizeof(Constraint *)); // FREE ME
-    for (int x = 0; x < i; ++x) {
-        vMatrix[x] = malloc((unsigned long) j * sizeof(Constraint)); // FREE ME
-        for (int y = 0; y < j; ++y) {
-            vMatrix[x][y].nConstraints = numOfConstraints;
-            vMatrix[x][y].pairs = defaultPairs;
-        }
-    }
-    return vMatrix;
-}
-
-ColorPair *defaultColorPairs() {
+ColorPair *verticalColorPairs() {
 
     int numOfConstraints = 12;
     ColorPair *defaultPairs = malloc((unsigned long) numOfConstraints * sizeof(ColorPair)); // FREE ME
@@ -132,4 +156,57 @@ ColorPair *defaultColorPairs() {
     defaultPairs[11] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gg")};
 
     return defaultPairs;
+}
+
+ColorPair *secondCategoryColorPairs() {
+
+    int numOfConstraints = 12;
+    ColorPair *secondPairs = malloc((unsigned long) numOfConstraints * sizeof(ColorPair)); // FREE ME
+    secondPairs[0] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("bb")};
+    secondPairs[1] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("bg")};
+    secondPairs[2] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("bb")};
+    secondPairs[3] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("bg")};
+
+    secondPairs[4] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("rr")};
+    secondPairs[5] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("rr")};
+
+    secondPairs[6] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gb")};
+    secondPairs[7] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gg")};
+
+    secondPairs[8] = (ColorPair)  {.color1 = s2n("gb"), .color2 = s2n("gb")};
+    secondPairs[9] = (ColorPair)  {.color1 = s2n("gb"), .color2 = s2n("gg")};
+    secondPairs[10] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gb")};
+    secondPairs[11] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gg")};
+
+    return secondPairs;
+}
+
+/**
+ * "Switch" statement for handling string expressions as input.
+ */
+int s2n(char *str) {
+
+    if (!strcmp(str, "b"))
+        return 0;
+    if (!strcmp(str, "g"))
+        return 1;
+    if (!strcmp(str, "rr"))
+        return 2;
+    if (!strcmp(str, "bb"))
+        return 3;
+    if (!strcmp(str, "bg"))
+        return 4;
+    if (!strcmp(str, "br"))
+        return 5;
+    if (!strcmp(str, "gb"))
+        return 6;
+    if (!strcmp(str, "gg"))
+        return 7;
+    if (!strcmp(str, "gr"))
+        return 8;
+    else {
+        fprintf(stderr, "Bad input @ s2n().\n");
+        fprintf(stderr, "Input: %s\n", str);
+        exit(EXIT_FAILURE);
+    }
 }
