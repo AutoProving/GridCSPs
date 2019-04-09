@@ -18,7 +18,7 @@ Constraint **buildHorizontalMatrix(int rows, int columns);
 ColorPair *secondCategoryColorPairs();
 
 LCInstance *pigeonholeInstance(int rows, int columns) {
-
+    //pigeon is not defined as a size ? 
     LCInstance *pigeon = malloc(sizeof(*pigeon)); // FREE ME
 
     pigeon->nRows = rows;
@@ -30,12 +30,14 @@ LCInstance *pigeonholeInstance(int rows, int columns) {
     for (int x = 0; x < rows; ++x) {
         pigeon->IntermediateColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
         for (int y = 0; y < columns; ++y)
-            pigeon->IntermediateColors[x][y] = *defaultMap;
-//            pigeon->IntermediateColors[x][y] = *defaultColorMap();
+            //pigeon->IntermediateColors[x][y] = *defaultMap;
+            //If it is done as over, if you chage on instance you change all, i think
+            pigeon->IntermediateColors[x][y] = *defaultColorMap();
     }
 
     // !ACHTUNG! FinalColors is now an ALIAS of IntermediateColors. TODO Ask Mateus.
-    pigeon->FinalColors = pigeon->IntermediateColors;
+    // Think final colors is solution, make a empty struckt or NULL 
+    pigeon->FinalColors = pigeon->NULL;
 
     pigeon->vConstraints = buildVerticalMatrix(rows, columns);
 
