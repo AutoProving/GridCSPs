@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-AlphabetMap *defaultColorMap(void);
+AlphabetMap *defaultAlphaMap(void);
 
 int s2n(char *str);
 
@@ -18,30 +18,31 @@ Constraint **buildHorizontalMatrix(int rows, int columns);
 ColorPair *secondCategoryColorPairs();
 
 LCInstance *pigeonholeInstance(int rows, int columns) {
-    //pigeon is not defined as a size ? 
+
     LCInstance *pigeon = malloc(sizeof(*pigeon)); // FREE ME
 
     pigeon->nRows = rows;
     pigeon->nColumns = columns;
 
-    AlphabetMap *defaultMap = defaultColorMap();
+    AlphabetMap *defaultMap = defaultAlphaMap();
 
     pigeon->IntermediateColors = malloc((unsigned long) rows * sizeof(AlphabetMap *)); // FREE ME
     for (int x = 0; x < rows; ++x) {
         pigeon->IntermediateColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
         for (int y = 0; y < columns; ++y)
-            //pigeon->IntermediateColors[x][y] = *defaultMap;
-            //If it is done as over, if you chage on instance you change all, i think
-            pigeon->IntermediateColors[x][y] = *defaultColorMap();
+            pigeon->IntermediateColors[x][y] = *defaultMap;
+//            pigeon->IntermediateColors[x][y] = *defaultAlphaMap();
     }
 
     // !ACHTUNG! FinalColors is now an ALIAS of IntermediateColors. TODO Ask Mateus.
-    // Think final colors is solution, make a empty struckt or NULL 
-    pigeon->FinalColors = pigeon->NULL;
+    pigeon->FinalColors = pigeon->IntermediateColors;
+
+    //    pigeon->colorMap = NULL; TODO Ask Mateus.
 
     pigeon->vConstraints = buildVerticalMatrix(rows, columns);
 
     pigeon->hConstraints = buildHorizontalMatrix(rows, columns);
+
 
     return pigeon;
 }
@@ -112,7 +113,7 @@ Constraint **buildHorizontalMatrix(int rows, int columns) {
     return hMatrix;
 }
 
-AlphabetMap *defaultColorMap(void) {
+AlphabetMap *defaultAlphaMap(void) {
 
     int alphaSize = 9;
     AlphabetMap *defaultMap = malloc(sizeof(AlphabetMap));
@@ -184,7 +185,7 @@ ColorPair *secondCategoryColorPairs() {
 }
 
 /**
- * "Switch" statement for handling string expressions as input.
+ * "Switch statement" for handling string as case input.
  */
 int s2n(char *str) {
 
