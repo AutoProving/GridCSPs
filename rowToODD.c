@@ -22,13 +22,12 @@ void copyAlphabets(LCInstance *instance, int i, ODD *resultingODD) {
         AlphabetMap currentMap = {.sizeAlphabet=map[i][j].sizeAlphabet,
                 .N2S=malloc(sizeof(char*)*map[i][j].sizeAlphabet),
                 .S2N=malloc(sizeof(int)*map[i][j].sizeAlphabet)};
-        Layer currentLayer = resultingODD->layerSequence[j];
         for (int k = 0; k < map[i][j].sizeAlphabet; ++k) {
             currentMap.S2N[k] = map[i][j].S2N[k];
             currentMap.N2S[k] = malloc(strlen(map[i][j].N2S[k]));
             strcpy(currentMap.N2S[k], map[i][j].N2S[k]);
         }
-        currentLayer.map = currentMap;
+        resultingODD->layerSequence[j].map = currentMap;
     }
 }
 
@@ -42,6 +41,7 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     resultingODD->layerSequence[0].leftStates = leftStates1;
     resultingODD->layerSequence[0].initialFlag = 1;
     resultingODD->layerSequence[0].finalFlag = 0;
+    resultingODD->layerSequence[0].initialStates = initialStates;
 
     for (int j = 1; j < cols; j++) {
         int alphSize = map[i][j-1].sizeAlphabet;
@@ -117,8 +117,8 @@ void rowToODD(LCInstance *instance, int i, ODD *resultingODD) {
   resultingODD-> nLayers = instance->nRows;
   resultingODD->layerSequence = malloc(sizeof(Layer)*resultingODD->nLayers);
   addTransitions(instance, i, resultingODD);
-  addLayerStatesAndEndStates(&instance, i, &resultingODD);
-  copyAlphabets(&instance, i, &resultingODD);
+  addLayerStatesAndEndStates(instance, i, resultingODD);
+  copyAlphabets(instance, i, resultingODD);
 }
 
 
