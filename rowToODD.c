@@ -28,6 +28,7 @@ void copyAlphabets(LCInstance *instance, int i, ODD *resultingODD) {
             currentMap.N2S[k] = malloc(strlen(map[i][j].N2S[k]));
             strcpy(currentMap.N2S[k], map[i][j].N2S[k]);
         }
+        currentLayer.map = currentMap;
     }
 }
 
