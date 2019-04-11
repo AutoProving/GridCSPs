@@ -56,5 +56,5 @@ Layer *nextLayer(LCInstance *instance, int i, int j, Layer **m); // Constructs n
 
 NumSymbol *getPath(ODD odd);
 
-bool inConstraints(check,constraints);
+bool inConstraints(ColorPair *check,Constraint *constraints);
 ODD* cleanIncompatible(LCInstance* grid, NumSymbol* path, int i, ODD* odd);
