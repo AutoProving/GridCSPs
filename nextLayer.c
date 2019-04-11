@@ -6,6 +6,7 @@
 
 NumSymbol memo(State l, Layer *layer);
 Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j);
+void copyStates(StateContainer *copyTo, StateContainer *copyFrom);
 
 Layer* nextLayer(LCInstance *instance, int i, int j, Layer** m) 
 {
@@ -40,12 +41,21 @@ NumSymbol memo(State l, Layer *layer)
 Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
 {
     Layer *result = (Layer *)malloc(sizeof(Layer));
-    result->leftStates = left->rightStates;
-    result->rightStates = up->rightStates;
-    result->initialStates = left->initialStates;
-    result->finalStates = up->finalStates;
-    result->initialFlag = left->initialFlag;
+    if (left != NULL) // j != 0
+    { 
+        copyStates(&result->leftStates, &left->rightStates);
+        result->initialStates.nStates = 0;
+    }
+    else // j == 0
+    {
+        // result->leftStates = ???
+        // result->initialStates = ???
+    }
+    
+    copyStates(&result->rightStates, &up->rightStates);
+    copyStates(&result->finalStates, &up->finalStates);
     result->finalFlag = up->finalFlag;
+    result->initialFlag = 0;
     result->map = instance->IntermediateColors[i][j];
 
     result->transitions.nTransitions = 0;
@@ -89,3 +99,22 @@ Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
 
     return result;
 }
+
+void copyStates(StateContainer *copyTo, StateContainer *copyFrom)
+{
+    copyTo->nStates = copyFrom->nStates;
+    copyTo->set = malloc(copyTo->nStates * sizeof(State));
+    for(int i = 0; i < copyFrom->nStates; i++)
+    {
+        copyTo->set[i] = copyFrom->set[i];
+    }
+}
+
+// void copyAlphabetMap(AlphabetMap *copyTo, AlphabetMap *copyFrom)
+// {
+//     copyTo->sizeAlphabet = copyFrom->sizeAlphabet;
+//     for(int i = 0; i < copyFrom->nStates; i++)
+//     {
+//         copyTo->set[i] = copyFrom->set[i];
+//     }
+// }
