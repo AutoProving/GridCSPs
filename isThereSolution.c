@@ -33,7 +33,9 @@ bool isThereSolution(LCInstance* I){
             aux.layerSequence[j] = nextIncrement(I, &L[row].layerSequence[left], &L[i-1].layerSequence[j], i, j);
         }
         powerSetODD(&aux, &powSet);
-        //minimize(&aux);
+        /* BLOCKED:
+         * minimize(&aux);
+         */
         L[i] = powSet;
     }
 
