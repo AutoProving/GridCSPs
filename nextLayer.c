@@ -39,7 +39,7 @@ NumSymbol memo(State l, Layer *layer)
 
 Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
 {
-    Layer *result;
+    Layer *result = (Layer *)malloc(sizeof(Layer));
     result->leftStates = left->rightStates;
     result->rightStates = up->rightStates;
     result->initialStates = left->initialStates;
@@ -86,4 +86,6 @@ Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
             }
         }
     }
+
+    return result;
 }
