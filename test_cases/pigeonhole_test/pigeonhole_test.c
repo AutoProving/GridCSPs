@@ -16,7 +16,6 @@ int main() {
     printf("nRows: %d\n", piggy->nRows);
     printf("nCols: %d\n", piggy->nColumns);
 
-    printf("\x1b[34m");
     printf("IntermediateColors[%d][%d]\n", piggy->nRows, piggy->nColumns);
     for (int x = 0; x < piggy->nRows; ++x) {
         for (int y = 0; y < piggy->nColumns; ++y) {
@@ -29,7 +28,6 @@ int main() {
         }
     }
 
-    printf("\x1b[33m");
     printf("\n\nFinalColors[%d][%d]\n", piggy->nRows, piggy->nColumns);
     for (int x = 0; x < piggy->nRows; ++x) {
         for (int y = 0; y < piggy->nColumns; ++y) {
@@ -42,7 +40,6 @@ int main() {
         }
     }
 
-    printf("\x1b[34m");
     printf("\n\ncolorMap[%d][%d]\n", piggy->nRows, piggy->nColumns);
     for (int x = 0; x < piggy->nRows; ++x) {
         for (int y = 0; y < piggy->nColumns; ++y) {
@@ -54,7 +51,6 @@ int main() {
         }
     }
 
-    printf("\x1b[33m");
     int vConRow = piggy->nRows - 1;
     int vConCol = piggy->nColumns;
     printf("\nVertical Constraint Matrix[%d][%d]: \n", vConRow, vConCol);
@@ -78,7 +74,6 @@ int main() {
 
     int hConRow = piggy->nRows;
     int hConCol = piggy->nColumns - 1;
-    printf("\x1b[34m");
     printf("Horizontal Constraint Matrix[%d][%d]: \n", hConRow, hConCol);
     for (int x = 0; x < hConRow; ++x) {
         for (int y = 0; y < hConCol; ++y) {
