@@ -2,6 +2,7 @@
 // This file is licensed under MIT License, as specified in the file LISENSE located at the root folder of this repository.
 
 #include <stdlib.h>
+#include <math.h>
 #include "listColoring.h"
 
 NumSymbol memo(State l, Layer *layer);
@@ -45,19 +46,22 @@ Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
     { 
         copyStates(&result->leftStates, &left->rightStates);
         result->initialStates.nStates = 0;
+        result->initialFlag = 0;
     }
     else // j == 0
     {
-        // result->leftStates = ???
-        // result->initialStates = ???
+        result->leftStates.nStates = 1;
+        result->initialStates.nStates = 1;
+        result->leftStates.set = calloc(1, sizeof(int));
+        result->initialStates.set = calloc(1, sizeof(int));
+        result->initialFlag = 1;
     }
+    result->width = fmax(result->leftStates.nStates, result->rightStates.nStates);
     
     copyStates(&result->rightStates, &up->rightStates);
     copyStates(&result->finalStates, &up->finalStates);
     result->finalFlag = up->finalFlag;
-    result->initialFlag = 0;
     result->map = instance->IntermediateColors[i][j];
-
     result->transitions.nTransitions = 0;
 
     //assume i != 0.
