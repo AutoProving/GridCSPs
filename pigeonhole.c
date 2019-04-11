@@ -1,21 +1,23 @@
-// Copyright 2019 Andreas Ommundsen, ... PLEASE ADD YOUR NAMES HERE AS YOU CONTRIBUTE
+// Copyright 2019 Andreas Ommundsen, Lucia Fuentes Villodres, Daniel Notland, Nora Hobæk Hovland, Simen Lone
 // This file is licensed under MIT License, as specified in the file LICENSE located at the root folder of this repository.
 #include "listColoring.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-AlphabetMap *defaultAlphaMap(void);
-
 int s2n(char *str);
 
+AlphabetMap *defaultAlphaMap(void);
+
+ColorMap *defaultColorMap(void);
+
 ColorPair *verticalColorPairs();
+
+ColorPair *secondCategoryColorPairs();
 
 Constraint **buildVerticalMatrix(int rows, int columns);
 
 Constraint **buildHorizontalMatrix(int rows, int columns);
-
-ColorPair *secondCategoryColorPairs();
 
 LCInstance *pigeonholeInstance(int rows, int columns) {
 
@@ -24,20 +26,26 @@ LCInstance *pigeonholeInstance(int rows, int columns) {
     pigeon->nRows = rows;
     pigeon->nColumns = columns;
 
-    AlphabetMap *defaultMap = defaultAlphaMap();
-
     pigeon->IntermediateColors = malloc((unsigned long) rows * sizeof(AlphabetMap *)); // FREE ME
     for (int x = 0; x < rows; ++x) {
         pigeon->IntermediateColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
         for (int y = 0; y < columns; ++y)
-            pigeon->IntermediateColors[x][y] = *defaultMap;
-//            pigeon->IntermediateColors[x][y] = *defaultAlphaMap();
+            pigeon->IntermediateColors[x][y] = *defaultAlphaMap();
     }
 
-    // !ACHTUNG! FinalColors is now an ALIAS of IntermediateColors. TODO Ask Mateus.
-    pigeon->FinalColors = pigeon->IntermediateColors;
+    pigeon->FinalColors = malloc((unsigned long) rows * sizeof(AlphabetMap *)); // FREE ME
+    for (int x = 0; x < rows; ++x) {
+        pigeon->FinalColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
+        for (int y = 0; y < columns; ++y)
+            pigeon->FinalColors[x][y] = *defaultAlphaMap();
+    }
 
-    //    pigeon->colorMap = NULL; TODO Ask Mateus.
+    pigeon->colorMap = malloc((unsigned long) rows * sizeof(ColorMap *)); // FREE ME
+    for (int x = 0; x < rows; ++x) {
+        pigeon->colorMap[x] = malloc((unsigned long) columns * sizeof(ColorMap)); // FREE ME
+        for (int y = 0; y < columns; ++y)
+            pigeon->colorMap[x][y] = *defaultColorMap();
+    }
 
     pigeon->vConstraints = buildVerticalMatrix(rows, columns);
 
@@ -106,8 +114,8 @@ Constraint **buildHorizontalMatrix(int rows, int columns) {
     thirdPairs[2] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("g")};
 
     for (int x = 0; x < i; ++x) {
-        hMatrix[x][j-1].nConstraints = thirdNum;
-        hMatrix[x][j-1].pairs = thirdPairs;
+        hMatrix[x][j - 1].nConstraints = thirdNum;
+        hMatrix[x][j - 1].pairs = thirdPairs;
     }
 
     return hMatrix;
@@ -133,7 +141,19 @@ AlphabetMap *defaultAlphaMap(void) {
 
     defaultMap->S2N = malloc((unsigned long) alphaSize * sizeof(int)); // FREE ME
     for (int i = 0; i < alphaSize; ++i)
-        defaultMap->S2N[i] = i; // TODO ASK MATEUS ABOUT THE ORDINALITY OF THE COLOR PERMUTATIONS.
+        defaultMap->S2N[i] = i;
+
+    return defaultMap;
+}
+
+ColorMap *defaultColorMap(void) {
+
+    ColorMap *defaultMap = malloc(sizeof(ColorMap));
+
+    defaultMap->nColors = 9;
+    defaultMap->map = malloc((unsigned long) defaultMap->nColors * sizeof(int));
+    for (int i = 0; i < defaultMap->nColors; ++i)
+        defaultMap->map[i] = i;
 
     return defaultMap;
 }
@@ -176,8 +196,8 @@ ColorPair *secondCategoryColorPairs() {
     secondPairs[6] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gb")};
     secondPairs[7] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gg")};
 
-    secondPairs[8] = (ColorPair)  {.color1 = s2n("gb"), .color2 = s2n("gb")};
-    secondPairs[9] = (ColorPair)  {.color1 = s2n("gb"), .color2 = s2n("gg")};
+    secondPairs[8] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("gb")};
+    secondPairs[9] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("gg")};
     secondPairs[10] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gb")};
     secondPairs[11] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gg")};
 
