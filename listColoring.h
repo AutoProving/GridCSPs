@@ -55,3 +55,6 @@ void rowToODD(LCInstance *instance, int i, ODD *resultingODD); // Takes an insta
 Layer *nextLayer(LCInstance *instance, int i, int j, Layer **m); // Constructs next layer.
 
 NumSymbol *getPath(ODD odd);
+
+bool inConstraints(check,constraints);
+ODD* cleanIncompatible(LCInstance* grid, NumSymbol* path, int i, ODD* odd);
