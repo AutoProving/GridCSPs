@@ -27,10 +27,6 @@ Layer *nextLayer(LCInstance *instance, int i, int j, Layer **m)
 //else error/exception
 NumSymbol memo(State l, Layer *layer)
 {
-
-    NumSymbol a;
-    int first = 1;
-
     for (int i = 0; i < layer->transitions.nTransitions; i++)
     {
         if (layer->transitions.set[i].s2 == l)
@@ -59,10 +55,11 @@ Layer *nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
         result->initialStates.set = calloc(1, sizeof(int));
         result->initialFlag = 1;
     }
-    result->width = fmax(result->leftStates.nStates, result->rightStates.nStates);
 
     copyStates(&result->rightStates, &up->rightStates);
     copyStates(&result->finalStates, &up->finalStates);
+
+    result->width = fmax(result->leftStates.nStates, result->rightStates.nStates);
     result->finalFlag = up->finalFlag;
     result->map = instance->IntermediateColors[i][j];
 
@@ -103,8 +100,7 @@ void addTransitionsByVAndHConstraints(Layer *result, Layer *left, Transition *up
     {
         if (vC->pairs[vertical].color1 == a && vC->pairs[vertical].color2 == b)
         {
-
-            if (hC == NULL)
+            if (left == NULL)
             {
                 result->transitions.set[result->transitions.nTransitions].s1 = upT->s1;
                 result->transitions.set[result->transitions.nTransitions].a = b;
