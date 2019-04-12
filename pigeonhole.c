@@ -86,9 +86,9 @@ Constraint **buildHorizontalMatrix(int rows, int columns) {
     // First Category
     int firstNum = 3;
     ColorPair *firstPairs = malloc((unsigned long) firstNum * sizeof(ColorPair)); // FREE ME
-    firstPairs[0] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("bb")};
-    firstPairs[1] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("bg")};
-    firstPairs[2] = (ColorPair) {.color1 = s2n("b"), .color2 = s2n("rr")};
+    firstPairs[0] = (ColorPair) {s2n("b"), s2n("bb")};
+    firstPairs[1] = (ColorPair) {s2n("b"), s2n("bg")};
+    firstPairs[2] = (ColorPair) {s2n("b"), s2n("rr")};
 
     for (int x = 0; x < i; ++x) {
         hMatrix[x][0].nConstraints = firstNum;
@@ -109,9 +109,9 @@ Constraint **buildHorizontalMatrix(int rows, int columns) {
     // Third Category
     int thirdNum = 3;
     ColorPair *thirdPairs = malloc((unsigned long) thirdNum * sizeof(ColorPair)); // FREE ME
-    thirdPairs[0] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("g")};
-    thirdPairs[1] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("g")};
-    thirdPairs[2] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("g")};
+    thirdPairs[0] = (ColorPair) {s2n("rr"), s2n("g")};
+    thirdPairs[1] = (ColorPair) {s2n("gb"), s2n("g")};
+    thirdPairs[2] = (ColorPair) {s2n("gg"), s2n("g")};
 
     for (int x = 0; x < i; ++x) {
         hMatrix[x][j - 1].nConstraints = thirdNum;
@@ -162,21 +162,21 @@ ColorPair *verticalColorPairs() {
 
     int numOfConstraints = 12;
     ColorPair *defaultPairs = malloc((unsigned long) numOfConstraints * sizeof(ColorPair)); // FREE ME
-    defaultPairs[0] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("bb")};
-    defaultPairs[1] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("gb")};
-    defaultPairs[2] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("bb")};
-    defaultPairs[3] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("gb")};
+    defaultPairs[0] = (ColorPair) {s2n("bb"), s2n("bb")};
+    defaultPairs[1] = (ColorPair) {s2n("bb"), s2n("gb")};
+    defaultPairs[2] = (ColorPair) {s2n("gb"), s2n("bb")};
+    defaultPairs[3] = (ColorPair) {s2n("gb"), s2n("gb")};
 
-    defaultPairs[4] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("rr")};
-    defaultPairs[5] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("rr")};
+    defaultPairs[4] = (ColorPair) {s2n("bb"), s2n("rr")};
+    defaultPairs[5] = (ColorPair) {s2n("gb"), s2n("rr")};
 
-    defaultPairs[6] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("bg")};
-    defaultPairs[7] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gg")};
+    defaultPairs[6] = (ColorPair) {s2n("rr"), s2n("bg")};
+    defaultPairs[7] = (ColorPair) {s2n("rr"), s2n("gg")};
 
-    defaultPairs[8] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("bg")};
-    defaultPairs[9] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("gg")};
-    defaultPairs[10] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("bg")};
-    defaultPairs[11] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gg")};
+    defaultPairs[8] = (ColorPair) {s2n("bg"), s2n("bg")};
+    defaultPairs[9] = (ColorPair) {s2n("bg"), s2n("gg")};
+    defaultPairs[10] = (ColorPair) {s2n("gg"), s2n("bg")};
+    defaultPairs[11] = (ColorPair) {s2n("gg"), s2n("gg")};
 
     return defaultPairs;
 }
@@ -185,21 +185,21 @@ ColorPair *secondCategoryColorPairs() {
 
     int numOfConstraints = 12;
     ColorPair *secondPairs = malloc((unsigned long) numOfConstraints * sizeof(ColorPair)); // FREE ME
-    secondPairs[0] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("bb")};
-    secondPairs[1] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("bg")};
-    secondPairs[2] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("bb")};
-    secondPairs[3] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("bg")};
+    secondPairs[0] = (ColorPair) {s2n("bb"), s2n("bb")};
+    secondPairs[1] = (ColorPair) {s2n("bb"), s2n("bg")};
+    secondPairs[2] = (ColorPair) {s2n("bg"), s2n("bb")};
+    secondPairs[3] = (ColorPair) {s2n("bg"), s2n("bg")};
 
-    secondPairs[4] = (ColorPair) {.color1 = s2n("bb"), .color2 = s2n("rr")};
-    secondPairs[5] = (ColorPair) {.color1 = s2n("bg"), .color2 = s2n("rr")};
+    secondPairs[4] = (ColorPair) {s2n("bb"), s2n("rr")};
+    secondPairs[5] = (ColorPair) {s2n("bg"), s2n("rr")};
 
-    secondPairs[6] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gb")};
-    secondPairs[7] = (ColorPair) {.color1 = s2n("rr"), .color2 = s2n("gg")};
+    secondPairs[6] = (ColorPair) {s2n("rr"), s2n("gb")};
+    secondPairs[7] = (ColorPair) {s2n("rr"), s2n("gg")};
 
-    secondPairs[8] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("gb")};
-    secondPairs[9] = (ColorPair) {.color1 = s2n("gb"), .color2 = s2n("gg")};
-    secondPairs[10] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gb")};
-    secondPairs[11] = (ColorPair) {.color1 = s2n("gg"), .color2 = s2n("gg")};
+    secondPairs[8] = (ColorPair) {s2n("gb"), s2n("gb")};
+    secondPairs[9] = (ColorPair) {s2n("gb"), s2n("gg")};
+    secondPairs[10] = (ColorPair) {s2n("gg"), s2n("gb")};
+    secondPairs[11] = (ColorPair) {s2n("gg"), s2n("gg")};
 
     return secondPairs;
 }
