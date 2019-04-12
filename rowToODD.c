@@ -50,8 +50,10 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         int byteSize = sizeof(State) * alphSize;
 
         StateContainer leftStates2 = {.nStates = alphSize, .set = malloc(byteSize)};
+        StateContainer leftStates3 = {.nStates = alphSize, .set = malloc(byteSize)};
         for (int k = 0; k < alphSize; ++k) {
             leftStates2.set[k] = k;
+            leftStates3.set[k] = k;
         }
         resultingODD->layerSequence[j].leftStates = leftStates2;
         resultingODD->layerSequence[j - 1].rightStates = leftStates2;
@@ -60,6 +62,10 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     int byteSize = sizeof(State) * alphSize;
     StateContainer lastRigthState = {.nStates = alphSize, .set = malloc(byteSize)};
     StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = malloc(byteSize)};
+    for (int k = 0; k < alphSize; ++k) {
+            lastRigthState.set[k] = k;
+            lastRigthStateCopy.set[k] = k;
+        }
     resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
     resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
 
