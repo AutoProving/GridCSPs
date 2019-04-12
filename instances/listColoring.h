@@ -52,4 +52,5 @@ void rowToODD(LCInstance* instance, int i, ODD* resultingODD); // Takes an insta
 					      
 
 Layer* nextLayer(LCInstance *instance, int i, int j, Layer** m); // Constructs next layer. 
-Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j);
+
+
