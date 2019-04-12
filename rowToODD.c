@@ -36,8 +36,10 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     AlphabetMap **map = instance->IntermediateColors;
     int cols = instance->nColumns;
 
-    StateContainer leftStates1 = {.nStates = 1, .set = 0};
-    StateContainer initialStates = {.nStates = 1, .set = 0};
+    StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(int))};
+    StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(int))};
+    leftStates1.set[0] = 0;
+    initialStates.set[0] = 0;
     resultingODD->layerSequence[0].leftStates = leftStates1;
     resultingODD->layerSequence[0].initialFlag = 1;
     resultingODD->layerSequence[0].finalFlag = 0;
