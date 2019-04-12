@@ -1,5 +1,5 @@
 #include "listColoring.h"
-#include "odd.h"
+#include "../ODDs/odd.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -59,8 +59,9 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     int alphSize = map[i][cols-1].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
     StateContainer lastRigthState = {.nStates = alphSize, .set = malloc(byteSize)};
+    StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = malloc(byteSize)};
     resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
-    resultingODD->layerSequence[cols-1].finalStates = lastRigthState;
+    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
 
     int max =-1;
     for (int j = 0; j < cols; ++j) {
