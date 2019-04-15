@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "../../listColoring.h"
+#include "../../helpers.h"
 
 LCInstance *pigeonholeInstance(int rows, int columns);
 
@@ -91,5 +92,6 @@ int main() {
             printf("\n");
         }
     }
+    killLCI(piggy);
     return 0;
 }
