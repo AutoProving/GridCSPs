@@ -1,3 +1,5 @@
+// Copyright 2019 Andreas Ommundsen, Lucia Fuentes Villodres, Daniel Notland, Nora Hobæk Hovland, Simen Lone
+// This file is licensed under MIT License, as specified in the file LICENSE located at the root folder of this repository.
 #include <stdlib.h>
 #include "helpers.h"
 
