@@ -11,9 +11,13 @@ AlphabetMap *defaultAlphaMap(void);
 
 ColorMap *defaultColorMap(void);
 
-ColorPair *verticalColorPairs();
+ColorPair *verticalColorPairs(void);
 
-ColorPair *secondCategoryColorPairs();
+ColorPair *firstCategoryColorPairs(void);
+
+ColorPair *secondCategoryColorPairs(void);
+
+ColorPair *thirdCategoryColorPairs(void);
 
 Constraint **buildVerticalMatrix(int rows, int columns);
 
@@ -29,28 +33,36 @@ LCInstance *pigeonholeInstance(int rows, int columns) {
     pigeon->IntermediateColors = malloc((unsigned long) rows * sizeof(AlphabetMap *)); // FREE ME
     for (int x = 0; x < rows; ++x) {
         pigeon->IntermediateColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
-        for (int y = 0; y < columns; ++y)
-            pigeon->IntermediateColors[x][y] = *defaultAlphaMap();
+        for (int y = 0; y < columns; ++y) {
+            AlphabetMap *temp = defaultAlphaMap();
+            pigeon->IntermediateColors[x][y] = *temp;
+            free(temp);
+        }
     }
 
     pigeon->FinalColors = malloc((unsigned long) rows * sizeof(AlphabetMap *)); // FREE ME
     for (int x = 0; x < rows; ++x) {
         pigeon->FinalColors[x] = malloc((unsigned long) columns * sizeof(AlphabetMap)); // FREE ME
-        for (int y = 0; y < columns; ++y)
-            pigeon->FinalColors[x][y] = *defaultAlphaMap();
+        for (int y = 0; y < columns; ++y) {
+            AlphabetMap *temp = defaultAlphaMap();
+            pigeon->FinalColors[x][y] = *temp;
+            free(temp);
+        }
     }
 
     pigeon->colorMap = malloc((unsigned long) rows * sizeof(ColorMap *)); // FREE ME
     for (int x = 0; x < rows; ++x) {
         pigeon->colorMap[x] = malloc((unsigned long) columns * sizeof(ColorMap)); // FREE ME
-        for (int y = 0; y < columns; ++y)
-            pigeon->colorMap[x][y] = *defaultColorMap();
+        for (int y = 0; y < columns; ++y) {
+            ColorMap *temp = defaultColorMap();
+            pigeon->colorMap[x][y] = *temp;
+            free(temp);
+        }
     }
 
     pigeon->vConstraints = buildVerticalMatrix(rows, columns);
 
     pigeon->hConstraints = buildHorizontalMatrix(rows, columns);
-
 
     return pigeon;
 }
@@ -61,14 +73,12 @@ Constraint **buildVerticalMatrix(int rows, int columns) {
     int j = columns;
     int numOfConstraints = 12;
 
-    ColorPair *defaultPairs = verticalColorPairs();
-
     Constraint **vMatrix = malloc((unsigned long) i * sizeof(Constraint *)); // FREE ME
     for (int x = 0; x < i; ++x) {
         vMatrix[x] = malloc((unsigned long) j * sizeof(Constraint)); // FREE ME
         for (int y = 0; y < j; ++y) {
             vMatrix[x][y].nConstraints = numOfConstraints;
-            vMatrix[x][y].pairs = defaultPairs;
+            vMatrix[x][y].pairs = verticalColorPairs();
         }
     }
     return vMatrix;
@@ -84,38 +94,23 @@ Constraint **buildHorizontalMatrix(int rows, int columns) {
         hMatrix[x] = malloc((unsigned long) j * sizeof(Constraint)); // FREE ME
 
     // First Category
-    int firstNum = 3;
-    ColorPair *firstPairs = malloc((unsigned long) firstNum * sizeof(ColorPair)); // FREE ME
-    firstPairs[0] = (ColorPair) {s2n("b"), s2n("bb")};
-    firstPairs[1] = (ColorPair) {s2n("b"), s2n("bg")};
-    firstPairs[2] = (ColorPair) {s2n("b"), s2n("rr")};
-
     for (int x = 0; x < i; ++x) {
-        hMatrix[x][0].nConstraints = firstNum;
-        hMatrix[x][0].pairs = firstPairs;
+        hMatrix[x][0].nConstraints = 3;
+        hMatrix[x][0].pairs = firstCategoryColorPairs();
     }
 
     // Second Category
-    int secondNum = 12;
-    ColorPair *secondPairs = secondCategoryColorPairs();
-
     for (int x = 0; x < i; ++x) {
-        for (int y = 1; y < j; ++y) {
-            hMatrix[x][y].nConstraints = secondNum;
-            hMatrix[x][y].pairs = secondPairs;
+        for (int y = 1; y < j-1; ++y) {
+            hMatrix[x][y].nConstraints = 12;
+            hMatrix[x][y].pairs = secondCategoryColorPairs();
         }
     }
 
     // Third Category
-    int thirdNum = 3;
-    ColorPair *thirdPairs = malloc((unsigned long) thirdNum * sizeof(ColorPair)); // FREE ME
-    thirdPairs[0] = (ColorPair) {s2n("rr"), s2n("g")};
-    thirdPairs[1] = (ColorPair) {s2n("gb"), s2n("g")};
-    thirdPairs[2] = (ColorPair) {s2n("gg"), s2n("g")};
-
     for (int x = 0; x < i; ++x) {
-        hMatrix[x][j - 1].nConstraints = thirdNum;
-        hMatrix[x][j - 1].pairs = thirdPairs;
+        hMatrix[x][j - 1].nConstraints = 3;
+        hMatrix[x][j - 1].pairs = thirdCategoryColorPairs();
     }
 
     return hMatrix;
@@ -129,15 +124,15 @@ AlphabetMap *defaultAlphaMap(void) {
     defaultMap->sizeAlphabet = alphaSize;
 
     defaultMap->N2S = malloc((unsigned long) alphaSize * sizeof(char *)); // FREE ME
-    defaultMap->N2S[0] = "b";
-    defaultMap->N2S[1] = "g";
-    defaultMap->N2S[2] = "rr";
-    defaultMap->N2S[3] = "bb";
-    defaultMap->N2S[4] = "bg";
-    defaultMap->N2S[5] = "br";
-    defaultMap->N2S[6] = "gb";
-    defaultMap->N2S[7] = "gg";
-    defaultMap->N2S[8] = "gr";
+    defaultMap->N2S[0] = strdup("b");
+    defaultMap->N2S[1] = strdup("g");
+    defaultMap->N2S[2] = strdup("rr");
+    defaultMap->N2S[3] = strdup("bb");
+    defaultMap->N2S[4] = strdup("bg");
+    defaultMap->N2S[5] = strdup("br");
+    defaultMap->N2S[6] = strdup("gb");
+    defaultMap->N2S[7] = strdup("gg");
+    defaultMap->N2S[8] = strdup("gr");
 
     defaultMap->S2N = malloc((unsigned long) alphaSize * sizeof(int)); // FREE ME
     for (int i = 0; i < alphaSize; ++i)
@@ -181,10 +176,20 @@ ColorPair *verticalColorPairs() {
     return defaultPairs;
 }
 
+ColorPair *firstCategoryColorPairs() {
+
+    int firstNum = 3;
+    ColorPair *firstPairs = malloc((unsigned long) firstNum * sizeof(ColorPair)); // FREE ME
+    firstPairs[0] = (ColorPair) {s2n("b"), s2n("bb")};
+    firstPairs[1] = (ColorPair) {s2n("b"), s2n("bg")};
+    firstPairs[2] = (ColorPair) {s2n("b"), s2n("rr")};
+    return firstPairs;
+}
+
 ColorPair *secondCategoryColorPairs() {
 
-    int numOfConstraints = 12;
-    ColorPair *secondPairs = malloc((unsigned long) numOfConstraints * sizeof(ColorPair)); // FREE ME
+    int secondNum = 12;
+    ColorPair *secondPairs = malloc((unsigned long) secondNum * sizeof(ColorPair)); // FREE ME
     secondPairs[0] = (ColorPair) {s2n("bb"), s2n("bb")};
     secondPairs[1] = (ColorPair) {s2n("bb"), s2n("bg")};
     secondPairs[2] = (ColorPair) {s2n("bg"), s2n("bb")};
@@ -202,6 +207,17 @@ ColorPair *secondCategoryColorPairs() {
     secondPairs[11] = (ColorPair) {s2n("gg"), s2n("gg")};
 
     return secondPairs;
+}
+
+ColorPair *thirdCategoryColorPairs() {
+
+    int thirdNum = 3;
+    ColorPair *thirdPairs = malloc((unsigned long) thirdNum * sizeof(ColorPair)); // FREE ME
+    thirdPairs[0] = (ColorPair) {s2n("rr"), s2n("g")};
+    thirdPairs[1] = (ColorPair) {s2n("gb"), s2n("g")};
+    thirdPairs[2] = (ColorPair) {s2n("gg"), s2n("g")};
+
+    return thirdPairs;
 }
 
 /**

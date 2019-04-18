@@ -9,6 +9,7 @@ void addTransitionsPerLayer(LCInstance *instance, int i, int j,
                             ODD *resultingODD);
 
 void addTransitions(LCInstance *instance, int i, ODD *resultingODD) {
+    int maxWidth = 0;
     for (int j = 0; j < resultingODD->nLayers; j++) {
         addTransitionsPerLayer(instance, i, j, resultingODD);
     }
@@ -73,8 +74,9 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     for (int j = 0; j < cols; ++j) {
         Layer result = resultingODD->layerSequence[j];
         result.width = result.leftStates.nStates > result.rightStates.nStates ? result.leftStates.nStates : result.rightStates.nStates;
+        resultingODD->layerSequence[j].width = result.width;
         if (result.width>max){
-            max = resultingODD->width;
+            max = result.width;
         }
     }
 
@@ -100,9 +102,11 @@ void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingOD
                 sizeof(Transition) * resultingODD->layerSequence[j].transitions.nTransitions);
 
         for (int trans = 0; trans < resultingODD->layerSequence[j].transitions.nTransitions; trans++) {
-            resultingODD->layerSequence[j].transitions.set[trans].s1 = instance->hConstraints[i][j].pairs[trans].color1;
-            resultingODD->layerSequence[j].transitions.set[trans].a = instance->hConstraints[i][j].pairs[trans].color2;
-            resultingODD->layerSequence[j].transitions.set[trans].s2 = instance->hConstraints[i][j].pairs[trans].color2;
+            int c1 = instance->hConstraints[i][j].pairs[trans].color1;
+            int c2 = instance->hConstraints[i][j].pairs[trans].color2;
+            resultingODD->layerSequence[j].transitions.set[trans].s1 = c1;
+            resultingODD->layerSequence[j].transitions.set[trans].a = c2;
+            resultingODD->layerSequence[j].transitions.set[trans].s2 = c2;
         }
     }
 }
