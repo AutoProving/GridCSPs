@@ -9,7 +9,6 @@ NumSymbol** reconstructSolution(LCInstance* lci)
 
     if (isThereSolution(lci, L))
     {
-        ODD aux = L[lci->nRows-1];
         NumSymbol** M = (NumSymbol**)malloc(lci->nRows);
         M[lci->nRows-1] = (NumSymbol*)malloc(lci->nColumns); 
         M[lci->nRows-1] = getPath(&L[lci->nRows-1]);
@@ -17,6 +16,7 @@ NumSymbol** reconstructSolution(LCInstance* lci)
         {
             ODD aux = cleanIncompatible(&L[i], M[i+1], i);
             M[i] = (NumSymbol*)malloc(lci->nColumns);
+            M[i] = getPath(&L[i]);
         }
         return M;
     }
