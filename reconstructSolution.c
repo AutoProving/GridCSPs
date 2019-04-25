@@ -11,17 +11,15 @@ NumSymbol** reconstructSolution(LCInstance* lci)
     {
         NumSymbol** M = (NumSymbol**)malloc(lci->nRows);
         M[lci->nRows-1] = (NumSymbol*)malloc(lci->nColumns); 
-        M[lci->nRows-1] = getPath(&L[lci->nRows-1]);
+        M[lci->nRows-1] = getPath(L[lci->nRows-1]);
         for (int i = lci->nRows-2; i >= 0; i--)
         {
-            ODD aux = cleanIncompatible(&L[i], M[i+1], i);
+            ODD aux = cleanIncompatible(lci, M[i+1], i, &L[i]);
             M[i] = (NumSymbol*)malloc(lci->nColumns);
-            M[i] = getPath(&L[i]);
+            M[i] = getPath(L[i]);
         }
         return M;
     }
-    
+
     return 0;
-
-
 }
