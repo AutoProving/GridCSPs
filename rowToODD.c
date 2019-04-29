@@ -60,8 +60,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         resultingODD->layerSequence[j - 1].rightStates = leftStates3;
         resultingODD->layerSequence[j].initialFlag = 0;
         resultingODD->layerSequence[j].finalFlag = 0;
-        StateContainer finalStates = {.nStates = alphSize, .set = malloc(byteSize)};
-        StateContainer initialStates = {.nStates = alphSize, .set = malloc(byteSize)};
+        StateContainer finalStates = {.nStates = 0, .set = malloc(byteSize)};
+        StateContainer initialStates = {.nStates = 0, .set = malloc(byteSize)};
         resultingODD->layerSequence[j].finalStates = finalStates;
         resultingODD->layerSequence[j].initialStates = initialStates;
     }
