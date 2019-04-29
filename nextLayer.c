@@ -35,7 +35,8 @@ NumSymbol memo(State l, Layer *layer)
         }
     }
 
-    exit(-1);
+    printf("Can't find state in left");
+    exit(EXIT_FAILURE);
 }
 
 Layer *nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j)
