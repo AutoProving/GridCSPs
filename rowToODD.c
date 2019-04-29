@@ -75,6 +75,7 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthState.set[k] = k;
             lastRigthStateCopy.set[k] = k;
         }
+    //TODO: This line messes up the transission
     resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
     resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
     resultingODD->layerSequence[cols-1].finalFlag = 1;
@@ -97,14 +98,14 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
 // TODO: What about final and init transitions
 void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingODD) {
     if (j == 0) { //Initial transitions goes from 0
-        resultingODD->layerSequence[j].transitions.nTransitions = instance->IntermediateColors[i][j].sizeAlphabet;
-        resultingODD->layerSequence[j].transitions.set = malloc(
-                sizeof(Transition) * resultingODD->layerSequence[j].transitions.nTransitions);
+        resultingODD->layerSequence[0].transitions.nTransitions = instance->IntermediateColors[i][j].sizeAlphabet;
+        resultingODD->layerSequence[0].transitions.set = malloc(
+                sizeof(Transition) * resultingODD->layerSequence[0].transitions.nTransitions);
 
         for (int trans = 0; trans < instance->IntermediateColors[i][j].sizeAlphabet; trans++) {
-            resultingODD->layerSequence[j].transitions.set[trans].s1 = 0;
-            resultingODD->layerSequence[j].transitions.set[trans].a = trans;
-            resultingODD->layerSequence[j].transitions.set[trans].s2 = trans;
+            resultingODD->layerSequence[0].transitions.set[trans].s1 = 0;
+            resultingODD->layerSequence[0].transitions.set[trans].a = trans;
+            resultingODD->layerSequence[0].transitions.set[trans].s2 = trans;
         }
     } else { // All other transitions
         resultingODD->layerSequence[j].transitions.nTransitions = instance->hConstraints[i][j].nConstraints;
