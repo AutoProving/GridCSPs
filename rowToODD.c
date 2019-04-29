@@ -75,9 +75,9 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthState.set[k] = k;
             lastRigthStateCopy.set[k] = k;
         }
-    //TODO: This line messes up the transission
-    resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
-    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    //TODO: This 2 lines messes up the transission
+    //resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
+    //resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
     resultingODD->layerSequence[cols-1].finalFlag = 1;
     resultingODD->layerSequence[cols-1].initialFlag = 0;
 
