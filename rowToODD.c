@@ -57,7 +57,13 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             leftStates3.set[k] = k;
         }
         resultingODD->layerSequence[j].leftStates = leftStates2;
-        resultingODD->layerSequence[j - 1].rightStates = leftStates2;
+        resultingODD->layerSequence[j - 1].rightStates = leftStates3;
+        resultingODD->layerSequence[j].initialFlag = 0;
+        resultingODD->layerSequence[j].finalFlag = 0;
+        StateContainer finalStates = {.nStates = alphSize, .set = malloc(byteSize)};
+        StateContainer initialStates = {.nStates = alphSize, .set = malloc(byteSize)};
+        resultingODD->layerSequence[j].finalStates = finalStates;
+        resultingODD->layerSequence[j].initialStates = initialStates;
     }
     int alphSize = map[i][cols-1].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
@@ -69,6 +75,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         }
     resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
     resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    resultingODD->layerSequence[cols-1].finalFlag = 1;
+    resultingODD->layerSequence[cols-1].initialFlag = 0;
 
     int max =-1;
     for (int j = 0; j < cols; ++j) {
