@@ -39,12 +39,14 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
 
     StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(int))};
     StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(int))};
+    StateContainer finalStates = {.nStates = 0, .set = NULL};
     leftStates1.set[0] = 0;
     initialStates.set[0] = 0;
     resultingODD->layerSequence[0].leftStates = leftStates1;
     resultingODD->layerSequence[0].initialFlag = 1;
     resultingODD->layerSequence[0].finalFlag = 0;
     resultingODD->layerSequence[0].initialStates = initialStates;
+    resultingODD->layerSequence[0].finalStates= finalStates;
 
     for (int j = 1; j < cols; j++) {
         int alphSize = map[i][j-1].sizeAlphabet;
