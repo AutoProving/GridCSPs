@@ -39,13 +39,13 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     StateContainer leftStates1 = {.nStates = 1, .set = (State *)malloc(sizeof(State))};
     StateContainer initialStates = {.nStates = 1, .set = (State *)malloc(sizeof(State))};
     StateContainer finalStates = {.nStates = 0, .set = NULL};
-    leftStates1.set[0] = 0;
-    initialStates.set[0] = 0;
     resultingODD->layerSequence[0].leftStates = leftStates1;
     resultingODD->layerSequence[0].initialFlag = 1;
     resultingODD->layerSequence[0].finalFlag = 0;
     resultingODD->layerSequence[0].initialStates = initialStates;
     resultingODD->layerSequence[0].finalStates= finalStates;
+    resultingODD->layerSequence[0].initialStates.set[0] = 0;
+    resultingODD->layerSequence[0].leftStates.set[0] = 0;
 
     for (int j = 1; j < cols; j++) {
         int alphSize = map[i][j-1].sizeAlphabet;
@@ -66,7 +66,7 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         resultingODD->layerSequence[j].finalStates = finalStates;
         resultingODD->layerSequence[j].initialStates = initialStates;
     }
-    int alphSize = map[i][cols-1].sizeAlphabet;
+    int alphSize = map[i][cols-2].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
     StateContainer lastRigthState = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
     StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
@@ -75,10 +75,10 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthStateCopy.set[k] = k;
         }
     //TODO: This 2 lines messes up the transission
-    resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
-    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
-    resultingODD->layerSequence[cols-1].finalFlag = 1;
-    resultingODD->layerSequence[cols-1].initialFlag = 0;
+    resultingODD->layerSequence[cols-2].rightStates = lastRigthState;
+    resultingODD->layerSequence[cols-2].finalStates = lastRigthStateCopy;
+    resultingODD->layerSequence[cols-2].finalFlag = 1;
+    resultingODD->layerSequence[cols-2].initialFlag = 0;
 
     int max =-1;
     for (int j = 0; j < cols; ++j) {
@@ -126,9 +126,9 @@ void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingOD
 void rowToODD(LCInstance *instance, int i, ODD *resultingODD) {
   resultingODD-> nLayers = instance->nRows;
   resultingODD->layerSequence = malloc(sizeof(Layer)*resultingODD->nLayers);
-  addTransitions(instance, i, resultingODD);
   addLayerStatesAndEndStates(instance, i, resultingODD);
-  copyAlphabets(instance, i, resultingODD);
+  //addTransitions(instance, i, resultingODD);
+  //copyAlphabets(instance, i, resultingODD);
 }
 
 
