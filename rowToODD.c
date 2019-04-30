@@ -36,8 +36,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     AlphabetMap **map = instance->IntermediateColors;
     int cols = instance->nColumns;
 
-    StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(State))};
-    StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(State))};
+    StateContainer leftStates1 = {.nStates = 1, .set = (State *)malloc(sizeof(State))};
+    StateContainer initialStates = {.nStates = 1, .set = (State *)malloc(sizeof(State))};
     StateContainer finalStates = {.nStates = 0, .set = NULL};
     leftStates1.set[0] = 0;
     initialStates.set[0] = 0;
@@ -61,8 +61,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         resultingODD->layerSequence[j - 1].rightStates = leftStates3;
         resultingODD->layerSequence[j].initialFlag = 0;
         resultingODD->layerSequence[j].finalFlag = 0;
-        StateContainer finalStates = {.nStates = 0, .set = malloc(byteSize)};
-        StateContainer initialStates = {.nStates = 0, .set = malloc(byteSize)};
+        StateContainer finalStates = {.nStates = 0, .set = (State *)malloc(byteSize)};
+        StateContainer initialStates = {.nStates = 0, .set = (State *)malloc(byteSize)};
         resultingODD->layerSequence[j].finalStates = finalStates;
         resultingODD->layerSequence[j].initialStates = initialStates;
     }
@@ -75,8 +75,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthStateCopy.set[k] = k;
         }
     //TODO: This 2 lines messes up the transission
-    //resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
-    //resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
+    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
     resultingODD->layerSequence[cols-1].finalFlag = 1;
     resultingODD->layerSequence[cols-1].initialFlag = 0;
 
