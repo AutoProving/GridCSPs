@@ -1,6 +1,9 @@
 // Copyright 2019 Mateus de Oliveira Oliveira
 // This file is licensed under MIT License, as specified in the file LISENSE located at the root folder of this repository.
 
+#ifndef LISTCOLORING_H
+#define LISTCOLORING_H
+
 #include "odd.h"
 
 ///////////////////// List Coloring Instance Type //////////////
@@ -53,3 +56,5 @@ void rowToODD(LCInstance* instance, int i, ODD* resultingODD); // Takes an insta
 
 Layer* nextLayer(LCInstance *instance, int i, int j, Layer** m); // Constructs next layer. 
 Layer* nextIncrement(LCInstance *instance, Layer *left, Layer *up, int i, int j);
+
+#endif

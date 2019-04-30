@@ -38,12 +38,14 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
 
     StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(State))};
     StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(State))};
+    StateContainer finalStates = {.nStates = 0, .set = NULL};
     leftStates1.set[0] = 0;
     initialStates.set[0] = 0;
     resultingODD->layerSequence[0].leftStates = leftStates1;
     resultingODD->layerSequence[0].initialFlag = 1;
     resultingODD->layerSequence[0].finalFlag = 0;
     resultingODD->layerSequence[0].initialStates = initialStates;
+    resultingODD->layerSequence[0].finalStates= finalStates;
 
     for (int j = 1; j < cols; j++) {
         int alphSize = map[i][j-1].sizeAlphabet;
@@ -56,7 +58,13 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             leftStates3.set[k] = k;
         }
         resultingODD->layerSequence[j].leftStates = leftStates2;
-        resultingODD->layerSequence[j - 1].rightStates = leftStates2;
+        resultingODD->layerSequence[j - 1].rightStates = leftStates3;
+        resultingODD->layerSequence[j].initialFlag = 0;
+        resultingODD->layerSequence[j].finalFlag = 0;
+        StateContainer finalStates = {.nStates = 0, .set = malloc(byteSize)};
+        StateContainer initialStates = {.nStates = 0, .set = malloc(byteSize)};
+        resultingODD->layerSequence[j].finalStates = finalStates;
+        resultingODD->layerSequence[j].initialStates = initialStates;
     }
     int alphSize = map[i][cols-1].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
@@ -66,8 +74,11 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthState.set[k] = k;
             lastRigthStateCopy.set[k] = k;
         }
-    resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
-    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    //TODO: This 2 lines messes up the transission
+    //resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
+    //resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    resultingODD->layerSequence[cols-1].finalFlag = 1;
+    resultingODD->layerSequence[cols-1].initialFlag = 0;
 
     int max =-1;
     for (int j = 0; j < cols; ++j) {
