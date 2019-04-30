@@ -9,7 +9,6 @@ void addTransitionsPerLayer(LCInstance *instance, int i, int j,
                             ODD *resultingODD);
 
 void addTransitions(LCInstance *instance, int i, ODD *resultingODD) {
-    int maxWidth = 0;
     for (int j = 0; j < resultingODD->nLayers; j++) {
         addTransitionsPerLayer(instance, i, j, resultingODD);
     }
@@ -37,8 +36,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     AlphabetMap **map = instance->IntermediateColors;
     int cols = instance->nColumns;
 
-    StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(int))};
-    StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(int))};
+    StateContainer leftStates1 = {.nStates = 1, .set = malloc(sizeof(State))};
+    StateContainer initialStates = {.nStates = 1, .set = malloc(sizeof(State))};
     leftStates1.set[0] = 0;
     initialStates.set[0] = 0;
     resultingODD->layerSequence[0].leftStates = leftStates1;
@@ -50,8 +49,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         int alphSize = map[i][j-1].sizeAlphabet;
         int byteSize = sizeof(State) * alphSize;
 
-        StateContainer leftStates2 = {.nStates = alphSize, .set = malloc(byteSize)};
-        StateContainer leftStates3 = {.nStates = alphSize, .set = malloc(byteSize)};
+        StateContainer leftStates2 = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
+        StateContainer leftStates3 = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
         for (int k = 0; k < alphSize; ++k) {
             leftStates2.set[k] = k;
             leftStates3.set[k] = k;
@@ -61,8 +60,8 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
     }
     int alphSize = map[i][cols-1].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
-    StateContainer lastRigthState = {.nStates = alphSize, .set = malloc(byteSize)};
-    StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = malloc(byteSize)};
+    StateContainer lastRigthState = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
+    StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
     for (int k = 0; k < alphSize; ++k) {
             lastRigthState.set[k] = k;
             lastRigthStateCopy.set[k] = k;
@@ -84,7 +83,6 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
 
 }
 
-// TODO: What about final and init transitions
 void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingODD) {
     if (j == 0) { //Initial transitions goes from 0
         resultingODD->layerSequence[j].transitions.nTransitions = instance->IntermediateColors[i][j].sizeAlphabet;
