@@ -66,7 +66,7 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
         resultingODD->layerSequence[j].finalStates = finalStates;
         resultingODD->layerSequence[j].initialStates = initialStates;
     }
-    int alphSize = map[i][cols-2].sizeAlphabet;
+    int alphSize = map[i][cols-1].sizeAlphabet;
     int byteSize = sizeof(State) * alphSize;
     StateContainer lastRigthState = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
     StateContainer lastRigthStateCopy = {.nStates = alphSize, .set = (State *) malloc(byteSize)};
@@ -75,10 +75,10 @@ void addLayerStatesAndEndStates(LCInstance *instance, int i, ODD *resultingODD) 
             lastRigthStateCopy.set[k] = k;
         }
     //TODO: This 2 lines messes up the transission
-    resultingODD->layerSequence[cols-2].rightStates = lastRigthState;
-    resultingODD->layerSequence[cols-2].finalStates = lastRigthStateCopy;
-    resultingODD->layerSequence[cols-2].finalFlag = 1;
-    resultingODD->layerSequence[cols-2].initialFlag = 0;
+    resultingODD->layerSequence[cols-1].rightStates = lastRigthState;
+    resultingODD->layerSequence[cols-1].finalStates = lastRigthStateCopy;
+    resultingODD->layerSequence[cols-1].finalFlag = 1;
+    resultingODD->layerSequence[cols-1].initialFlag = 0;
 
     int max =-1;
     for (int j = 0; j < cols; ++j) {
@@ -124,11 +124,11 @@ void addTransitionsPerLayer(LCInstance* instance, int i, int j, ODD* resultingOD
 // ODD accepting precisely those sequences of colors which are
 // horizontally compatible
 void rowToODD(LCInstance *instance, int i, ODD *resultingODD) {
-  resultingODD-> nLayers = instance->nRows;
+  resultingODD-> nLayers = instance->nColumns;
   resultingODD->layerSequence = malloc(sizeof(Layer)*resultingODD->nLayers);
   addLayerStatesAndEndStates(instance, i, resultingODD);
-  //addTransitions(instance, i, resultingODD);
-  //copyAlphabets(instance, i, resultingODD);
+  addTransitions(instance, i, resultingODD);
+  copyAlphabets(instance, i, resultingODD);
 }
 
 
