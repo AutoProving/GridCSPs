@@ -15,14 +15,14 @@ target_include_directories(ListColoring PUBLIC ext/ODDs/lib/)
 target_compile_options(ListColoring PRIVATE -Wall -Wextra -Wshadow)
 target_link_libraries(ListColoring PUBLIC ODDs)
 
-if (NOT LC_DISABLE_TESTS)
+if (NOT LIST_COLORING_DISABLE_TESTS)
     add_subdirectory(ext/googletest)
     enable_testing()
 
     include(GoogleTest)
 
     add_executable(ListColoringTest
-        test/Sample.cpp)
+        test/ListColoringClass.cpp)
     target_include_directories(ListColoringTest PUBLIC lib/)
     target_include_directories(ListColoringTest PUBLIC ext/ODDs/lib/)
     target_include_directories(ListColoringTest PUBLIC ext/googletest/googletest/include/)
