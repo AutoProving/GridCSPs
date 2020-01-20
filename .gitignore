@@ -53,5 +53,10 @@ dkms.conf
 
 # Idea files
 .idea
-cmake*
 .vscode
+
+# Build files and docs
+build/*
+!build/.keep
+doc/*
+!doc/.keep
