@@ -9,7 +9,8 @@ set(ODDs_DISABLE_TESTS ON)
 add_subdirectory(ext/ODDs)
 
 add_library(ListColoring STATIC
-    lib/ListColoring/ListColoring.cpp)
+    lib/ListColoring/ListColoring.cpp
+    lib/ListColoring/LegacyWriter.cpp)
 target_include_directories(ListColoring PUBLIC lib/)
 target_include_directories(ListColoring PUBLIC ext/ODDs/lib/)
 target_compile_options(ListColoring PRIVATE -Wall -Wextra -Wshadow)
@@ -22,8 +23,11 @@ if (NOT LIST_COLORING_DISABLE_TESTS)
     include(GoogleTest)
 
     add_executable(ListColoringTest
-        test/ListColoringClass.cpp)
+        test/Instances/Instances.cpp
+        test/ListColoringClass.cpp
+        test/LegacyIO.cpp)
     target_include_directories(ListColoringTest PUBLIC lib/)
+    target_include_directories(ListColoringTest PUBLIC test/)
     target_include_directories(ListColoringTest PUBLIC ext/ODDs/lib/)
     target_include_directories(ListColoringTest PUBLIC ext/googletest/googletest/include/)
     target_link_libraries(ListColoringTest gtest gtest_main)
