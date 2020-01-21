@@ -1,4 +1,5 @@
 #include <ListColoring/ListColoring.h>
+#include <ListColoring/LegacyWriter.h>
 
 namespace ListColoring {
 
@@ -56,6 +57,10 @@ Constraint& ProblemInstance::horizontalConstraint(int r, int c) {
 
 const Constraint& ProblemInstance::horizontalConstraint(int r, int c) const {
     return hconstraints_[r][c];
+}
+
+bool ProblemInstance::operator==(const ProblemInstance& rhs) const {
+    return Legacy::write(*this) == Legacy::write(rhs);
 }
 
 }

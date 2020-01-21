@@ -114,6 +114,13 @@ public:
      */
     const Constraint& horizontalConstraint(int r, int c) const;
 
+    /**
+     * @brief Compares two instances on equality.
+     *
+     * Useful for tests.
+     */
+    bool operator==(const ProblemInstance& rhs) const;
+
 private:
     /**
      * @brief Per-vertex color mapping.

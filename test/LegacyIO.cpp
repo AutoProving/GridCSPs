@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <ListColoring/ListColoring.h>
+#include <ListColoring/LegacyReader.h>
 #include <ListColoring/LegacyWriter.h>
 
 #include <Instances/Instances.h>
@@ -21,3 +22,47 @@ TEST(LegacyIOTest, writerStreamSample) {
     ListColoring::Legacy::write(ss, instance);
     EXPECT_EQ(expected, ss.str());
 }
+
+#if false
+TEST(LegacyIOTest, readerStringExampleNoComments) {
+    auto expected = TestInstances::sample();
+    std::string test = TestInstances::getResource("exampleNoComments");
+    auto actual = ListColoring::Legacy::read(test);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST(LegacyIOTest, readerStreamExampleNoComments) {
+    auto expected = TestInstances::sample();
+    std::string test = TestInstances::getResource("exampleNoComments");
+    std::istringstream ss(test);
+    auto actual = ListColoring::Legacy::read(ss);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST(LegacyIOTest, readerStringExample) {
+    auto expected = TestInstances::sample();
+    std::string test = TestInstances::getResource("example");
+    auto actual = ListColoring::Legacy::read(test);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST(LegacyIOTest, readerStreamExample) {
+    auto expected = TestInstances::sample();
+    std::string test = TestInstances::getResource("example");
+    std::istringstream ss(test);
+    auto actual = ListColoring::Legacy::read(ss);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST(LegacyIOTest, readerEmptyThrows) {
+    std::string test;
+    EXPECT_THROW(ListColoring::Legacy::read(test),
+                 ListColoring::Legacy::ReaderError);
+}
+
+TEST(LegacyIOTest, readerNotClosedCommentThrows) {
+    std::string test = "/";
+    EXPECT_THROW(ListColoring::Legacy::read(test),
+                 ListColoring::Legacy::ReaderError);
+}
+#endif
