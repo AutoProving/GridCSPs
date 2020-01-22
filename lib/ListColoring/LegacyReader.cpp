@@ -1,8 +1,5 @@
 #include <ListColoring/LegacyReader.h>
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/container.hpp>
-
 #include <algorithm>
 #include <iterator>
 #include <memory>
@@ -12,135 +9,262 @@ namespace ListColoring {
 namespace Legacy {
 namespace {
 
+class Token {
+public:
+    Token(std::string token)
+        : token_(token)
+    {}
+
+    std::string asString() {
+        return token_;
+    }
+
+    int asInt() {
+        int ret;
+        if (std::sscanf(token_.c_str(), "%d", &ret) != 1) {
+            throw ReaderError(token_ + ": integer format error");
+        }
+        return ret;
+    }
+
+    bool isInt() {
+        int tmp;
+        return std::sscanf(token_.c_str(), "%d", &tmp) == 1;
+    }
+private:
+    std::string token_;
+};
+
+template<class It>
+class Tokenizer {
+public:
+    Tokenizer(It beg, It end)
+        : cur_(beg)
+        , end_(end)
+        , state_(State::FREE)
+    {}
+
+    Token nextToken() {
+        while (state_ != State::IN_TOKEN) {
+            processChar();
+        }
+        while (cur_ != end_ && state_ == State::IN_TOKEN) {
+            processChar();
+        }
+        return Token(token_);
+    }
+
+    bool seekEof() {
+        while (cur_ != end_ && state_ != State::IN_TOKEN) {
+            processChar();
+        }
+        return cur_ == end_;
+    }
+
+private:
+    enum class State {
+        FREE,
+        IN_TOKEN,
+        COMMENT_1,
+        COMMENT
+    };
+
+    void processChar() {
+        if (cur_ == end_)
+            throw ReaderError("unexpected eof");
+        char c = *cur_++;
+        switch(state_) {
+        case State::FREE:
+            if (std::isspace(c)) {
+                break;
+            } else if (c == '/') {
+                state_ = State::COMMENT_1;
+            } else {
+                state_ = State::IN_TOKEN;
+                token_ = {c};
+            }
+            break;
+        case State::IN_TOKEN:
+            if (std::isspace(c)) {
+                state_ = State::FREE;
+            } else if (c == '/') {
+                state_ = State::COMMENT_1;
+            } else {
+                token_.push_back(c);
+            }
+            break;
+        case State::COMMENT_1:
+            if (std::isspace(c)) {
+                throw ReaderError("unexpected '/'");
+            } else if (c == '/') {
+                state_ = State::COMMENT;
+            } else {
+                throw ReaderError("unexpected '/'");
+            }
+            break;
+        case State::COMMENT:
+            if (c == '\n') {
+                state_ = State::FREE;
+            } else {
+                break;
+            }
+            break;
+        }
+    }
+
+    It cur_, end_;
+    State state_;
+    std::string token_;
+};
+
+template<class TT>
+std::vector<std::string> readColors(TT& tokenizer) {
+    int size = tokenizer.nextToken().asInt();
+    std::vector<std::string> ret(size);
+    for (int i = 0; i < size; i++) {
+        int id = tokenizer.nextToken().asInt();
+        std::string symbol = tokenizer.nextToken().asString();
+        ret[id] = symbol;
+    }
+    return ret;
+}
+
+template<class TT>
+std::vector<int> readColorMap(TT& tokenizer) {
+    int size = tokenizer.nextToken().asInt();
+    std::vector<int> ret(size);
+    for (int i = 0; i < size; i++) {
+        int id = tokenizer.nextToken().asInt();
+        int mm = tokenizer.nextToken().asInt();
+        ret[id] = mm;
+    }
+    return ret;
+}
+
+template<class TT>
+ConstraintOption readOption(TT& tokenizer) {
+    int fst = tokenizer.nextToken.asInt();
+    int snd = tokenizer.nextToken.asInt();
+    return {fst, snd};
+}
+
+template<class TT>
+class Reader {
+public:
+    Reader(TT& tokenizer)
+        : tokenizer_(tokenizer)
+        , i_(0)
+        , j_(0)
+    {}
+
+    ProblemInstance read() {
+        while (!tokenizer_.seekEof())
+            readControl();
+        checkInstance();
+        return *instance_;
+    }
+
+private:
+    void readHeader() {
+        int height = tokenizer_.nextToken().asInt();
+        int width = tokenizer_.nextToken().asInt();
+        instance_ = std::make_unique<ProblemInstance>(height, width);
+    }
+
+    void readColorLists() {
+        i_ = tokenizer_.nextToken().asInt();
+        j_ = tokenizer_.nextToken().asInt();
+    }
+
+    void readIntermediateColors() {
+        using ::ListColoring::Legacy::readColors;
+        checkInstance();
+        for (const std::string& symb : readColors(tokenizer_)) {
+            instance_->intermediateColors(i_, j_).addSymbol(symb);
+        }
+    }
+
+    void readFinalColors() {
+        using ::ListColoring::Legacy::readColors;
+        checkInstance();
+        for (const std::string& symb : readColors(tokenizer_)) {
+            instance_->finalColors(i_, j_).addSymbol(symb);
+        }
+    }
+
+    void readColorMap() {
+        using ::ListColoring::Legacy::readColorMap;
+        checkInstance();
+        instance_->colorMap(i_, j_) = readColorMap(tokenizer_);
+    }
+
+    void readConstraints(Constraint& constraint) {
+        if (tokenizer_.seekEof())
+            return;
+        Token token = tokenizer_.nextToken();
+        while (token.isInt()) {
+            int fst = token.asInt();
+            int snd = tokenizer_.nextToken().asInt();
+            constraint.insert({fst, snd});
+            if (tokenizer_.seekEof())
+                return;
+            token = tokenizer_.nextToken();
+        }
+        control_ = token.asString();
+    }
+
+    void readVConstraints() {
+        checkInstance();
+        i_ = tokenizer_.nextToken().asInt();
+        j_ = tokenizer_.nextToken().asInt();
+        readConstraints(instance_->verticalConstraint(i_, j_));
+    }
+
+    void readHConstraints() {
+        checkInstance();
+        i_ = tokenizer_.nextToken().asInt();
+        j_ = tokenizer_.nextToken().asInt();
+        readConstraints(instance_->horizontalConstraint(i_, j_));
+    }
+
+    void readControl() {
+        std::string control = control_.empty()
+                            ? tokenizer_.nextToken().asString()
+                            : control_;
+        control_.clear();
+        if (control == "LIST_COLORING")
+            readHeader();
+        else if (control == "COLOR_LISTS")
+            readColorLists();
+        else if (control == "INTERMEDIATE_COLORS")
+            readIntermediateColors();
+        else if (control == "FINAL_COLORS")
+            readFinalColors();
+        else if (control == "COLOR_MAP")
+            readColorMap();
+        else if (control == "VERTICAL_CONSTRAINTS")
+            readVConstraints();
+        else if (control == "HORIZONTAL_CONSTRAINTS")
+            readHConstraints();
+        else
+            throw ReaderError("unknown control: " + control);
+    }
+
+    void checkInstance() {
+        if (!instance_)
+            throw ReaderError("expected a header");
+    }
+
+    TT& tokenizer_;
+    int i_, j_;
+    std::unique_ptr<ProblemInstance> instance_;
+    std::string control_;
+};
+
 template<class It>
 ProblemInstance read(It begin, It end) {
-    namespace x3 = boost::spirit::x3;
-    namespace mpl = boost::mpl;
-    using boost::fusion::vector;
-    using boost::fusion::at;
-
-    It oldBegin = begin;
-
-    std::unique_ptr<ProblemInstance> instance;
-    int i = 0, j = 0; // Indices of an element to be modified
-
-    // Parser actions
-    auto createInstance = [&instance](auto& ctx) {
-        const auto& sz = x3::_attr(ctx);
-        int height = at<mpl::int_<0>>(sz);
-        int width = at<mpl::int_<1>>(sz);
-        instance = std::make_unique<ProblemInstance>(height, width);
-    };
-
-    auto setIndices = [&i, &j](auto& ctx) {
-        const auto& ind = x3::_attr(ctx);
-        i = at<mpl::int_<0>>(ind);
-        j = at<mpl::int_<1>>(ind);
-    };
-
-    auto setIntermediateColors = [&instance, &i, &j](auto& ctx) {
-        const auto& map = x3::_attr(ctx);
-        std::vector<std::string> alphabet(map.size());
-        for (const auto& v : map) {
-            int k = at<mpl::int_<0>>(v);
-            const std::string& symbol = at<mpl::int_<1>>(v);
-            alphabet[k] = symbol;
-        }
-        for (const auto& symbol : alphabet) {
-            instance->intermediateColors(i, j).addSymbol(symbol);
-        }
-    };
-
-    auto setFinalColors = [&instance, &i, &j](auto& ctx) {
-        const auto& map = x3::_attr(ctx);
-        std::vector<std::string> alphabet(map.size());
-        for (const auto& v : map) {
-            int k = at<mpl::int_<0>>(v);
-            const std::string& symbol = at<mpl::int_<1>>(v);
-            alphabet[k] = symbol;
-        }
-        for (const auto& symbol : alphabet) {
-            instance->finalColors(i, j).addSymbol(symbol);
-        }
-    };
-
-    auto setColorMap = [&instance, &i, &j](auto& ctx) {
-        const auto& map = x3::_attr(ctx);
-        ColorMap cmap(map.size());
-        for (const auto& v : map) {
-            int from = at<mpl::int_<0>>(v);
-            int to = at<mpl::int_<1>>(v);
-            cmap[from] = to;
-        }
-        instance->colorMap(i, j) = cmap;
-    };
-
-    auto setVConstraints = [&instance, &i, &j](auto& ctx) {
-        const auto& desc = x3::_attr(ctx);
-        for (const auto& c : desc) {
-            int lt = at<mpl::int_<0>>(c);
-            int rt = at<mpl::int_<1>>(c);
-            instance->verticalConstraint(i, j).insert({lt, rt});
-        }
-    };
-
-    auto setHConstraints = [&instance, &i, &j](auto& ctx) {
-        const auto& desc = x3::_attr(ctx);
-        for (const auto& c : desc) {
-            int lt = at<mpl::int_<0>>(c);
-            int rt = at<mpl::int_<1>>(c);
-            instance->horizontalConstraint(i, j).insert({lt, rt});
-        }
-    };
-
-    // Comments
-    auto lineComment = x3::lexeme["//" >> *(x3::char_ - x3::eol) >> x3::eol];
-    auto skipParser = x3::space | lineComment;
-
-    // Header
-    auto header = ("LIST_COLORING" >> x3::int_ >> x3::int_)[createInstance];
-
-    // Color lists
-    auto string = x3::lexeme[*(x3::char_ - x3::ascii::space)];
-    auto alphabetMember = x3::int_ >> string;
-    auto alphabetMap = *alphabetMember;
-    auto intermediateColors = "INTERMEDIATE_COLORS" >> x3::int_
-                           >> alphabetMap[setIntermediateColors];
-    auto finalColors = "FINAL_COLORS" >> x3::int_
-                    >> alphabetMap[setFinalColors];
-    auto colorMap = "COLOR_MAP" >> x3::int_
-                 >> (*(x3::int_ >> x3::int_))[setColorMap];
-    auto colorLists = "COLOR_LISTS"
-                   >> (x3::int_ >> x3::int_)[setIndices]
-                   >> *(intermediateColors | finalColors | colorMap);
-
-    // Constraints
-    auto constraints = *(x3::int_ >> x3::int_);
-    auto vconstraints = "VERTICAL_CONSTRAINTS"
-                     >> (x3::int_ >> x3::int_)[setIndices]
-                     >> constraints[setVConstraints];
-    auto hconstraints = "HORIZONTAL_CONSTRAINTS"
-                     >> (x3::int_ >> x3::int_)[setIndices]
-                     >> constraints[setHConstraints];
-
-    auto instanceDesc = header >> *(colorLists | hconstraints | vconstraints);
-
-    bool success = x3::phrase_parse(
-        begin,
-        end,
-        instanceDesc,
-        skipParser
-    );
-
-    if (!success)
-        throw ReaderError("spirit error");
-    if (begin != end)
-        throw ReaderError("spirit stopped at position "
-                         + std::to_string(begin - oldBegin));
-    if (!instance)
-        throw ReaderError("no header detected");
-
-    return *instance;
+    Tokenizer<It> tokenizer(begin, end);
+    return Reader<Tokenizer<It>>(tokenizer).read();
 }
 
 }
@@ -150,11 +274,8 @@ ReaderError::ReaderError(const std::string& message)
 {}
 
 ProblemInstance read(std::istream& is) {
-    std::string description;
-    std::copy(std::istreambuf_iterator<char>(is),
-              std::istreambuf_iterator<char>(),
-              std::back_inserter(description));
-    return read(description);
+    return read(std::istreambuf_iterator<char>(is),
+                std::istreambuf_iterator<char>());
 }
 
 ProblemInstance read(const std::string& description) {
