@@ -23,12 +23,11 @@ TEST(LegacyIOTest, writerStreamSample) {
     EXPECT_EQ(expected, ss.str());
 }
 
-#if false
 TEST(LegacyIOTest, readerStringExampleNoComments) {
     auto expected = TestInstances::sample();
     std::string test = TestInstances::getResource("exampleNoComments");
     auto actual = ListColoring::Legacy::read(test);
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ListColoring::Legacy::write(expected), ListColoring::Legacy::write(actual));
 }
 
 TEST(LegacyIOTest, readerStreamExampleNoComments) {
@@ -36,14 +35,14 @@ TEST(LegacyIOTest, readerStreamExampleNoComments) {
     std::string test = TestInstances::getResource("exampleNoComments");
     std::istringstream ss(test);
     auto actual = ListColoring::Legacy::read(ss);
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ListColoring::Legacy::write(expected), ListColoring::Legacy::write(actual));
 }
 
 TEST(LegacyIOTest, readerStringExample) {
     auto expected = TestInstances::sample();
     std::string test = TestInstances::getResource("example");
     auto actual = ListColoring::Legacy::read(test);
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ListColoring::Legacy::write(expected), ListColoring::Legacy::write(actual));
 }
 
 TEST(LegacyIOTest, readerStreamExample) {
@@ -51,7 +50,7 @@ TEST(LegacyIOTest, readerStreamExample) {
     std::string test = TestInstances::getResource("example");
     std::istringstream ss(test);
     auto actual = ListColoring::Legacy::read(ss);
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ListColoring::Legacy::write(expected), ListColoring::Legacy::write(actual));
 }
 
 TEST(LegacyIOTest, readerEmptyThrows) {
@@ -65,4 +64,3 @@ TEST(LegacyIOTest, readerNotClosedCommentThrows) {
     EXPECT_THROW(ListColoring::Legacy::read(test),
                  ListColoring::Legacy::ReaderError);
 }
-#endif

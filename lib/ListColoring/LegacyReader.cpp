@@ -3,6 +3,8 @@
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/container.hpp>
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <streambuf>
 
@@ -23,19 +25,21 @@ ProblemInstance read(It begin, It end) {
     int i = 0, j = 0; // Indices of an element to be modified
 
     // Parser actions
-    auto createInstance = [&instance](const vector<int, int>& sz) {
+    auto createInstance = [&instance](auto& ctx) {
+        const auto& sz = x3::_attr(ctx);
         int height = at<mpl::int_<0>>(sz);
         int width = at<mpl::int_<1>>(sz);
         instance = std::make_unique<ProblemInstance>(height, width);
     };
 
-    auto setIndices = [&instance, &i, &j](const vector<int, int>& ind) {
+    auto setIndices = [&i, &j](auto& ctx) {
+        const auto& ind = x3::_attr(ctx);
         i = at<mpl::int_<0>>(ind);
         j = at<mpl::int_<1>>(ind);
     };
 
-    using AMapDesc = std::vector<vector<int, std::string>>;
-    auto setIntermediateColors = [&instance, i, j](const AMapDesc& map) {
+    auto setIntermediateColors = [&instance, &i, &j](auto& ctx) {
+        const auto& map = x3::_attr(ctx);
         std::vector<std::string> alphabet(map.size());
         for (const auto& v : map) {
             int k = at<mpl::int_<0>>(v);
@@ -47,7 +51,8 @@ ProblemInstance read(It begin, It end) {
         }
     };
 
-    auto setFinalColors = [&instance, i, j](const AMapDesc& map) {
+    auto setFinalColors = [&instance, &i, &j](auto& ctx) {
+        const auto& map = x3::_attr(ctx);
         std::vector<std::string> alphabet(map.size());
         for (const auto& v : map) {
             int k = at<mpl::int_<0>>(v);
@@ -59,8 +64,8 @@ ProblemInstance read(It begin, It end) {
         }
     };
 
-    using CMapDesc = std::vector<vector<int, int>>;
-    auto setColorMap = [&instance, i, j](const CMapDesc& map) {
+    auto setColorMap = [&instance, &i, &j](auto& ctx) {
+        const auto& map = x3::_attr(ctx);
         ColorMap cmap(map.size());
         for (const auto& v : map) {
             int from = at<mpl::int_<0>>(v);
@@ -70,8 +75,8 @@ ProblemInstance read(It begin, It end) {
         instance->colorMap(i, j) = cmap;
     };
 
-    using ConstraintsDesc = std::vector<vector<int, int>>;
-    auto setVConstraints = [&instance, i, j](const ConstraintsDesc& desc) {
+    auto setVConstraints = [&instance, &i, &j](auto& ctx) {
+        const auto& desc = x3::_attr(ctx);
         for (const auto& c : desc) {
             int lt = at<mpl::int_<0>>(c);
             int rt = at<mpl::int_<1>>(c);
@@ -79,8 +84,8 @@ ProblemInstance read(It begin, It end) {
         }
     };
 
-    using ConstraintsDesc = std::vector<vector<int, int>>;
-    auto setHConstraints = [&instance, i, j](const ConstraintsDesc& desc) {
+    auto setHConstraints = [&instance, &i, &j](auto& ctx) {
+        const auto& desc = x3::_attr(ctx);
         for (const auto& c : desc) {
             int lt = at<mpl::int_<0>>(c);
             int rt = at<mpl::int_<1>>(c);
@@ -96,12 +101,12 @@ ProblemInstance read(It begin, It end) {
     auto header = ("LIST_COLORING" >> x3::int_ >> x3::int_)[createInstance];
 
     // Color lists
-    auto string = *x3::char_;
+    auto string = x3::lexeme[*(x3::char_ - x3::ascii::space)];
     auto alphabetMember = x3::int_ >> string;
-    auto alphabetMap = x3::int_ >> *alphabetMember;
-    auto intermediateColors = "INTERMEDIATE_COLORS"
+    auto alphabetMap = *alphabetMember;
+    auto intermediateColors = "INTERMEDIATE_COLORS" >> x3::int_
                            >> alphabetMap[setIntermediateColors];
-    auto finalColors = "FINAL_COLORS"
+    auto finalColors = "FINAL_COLORS" >> x3::int_
                     >> alphabetMap[setFinalColors];
     auto colorMap = "COLOR_MAP" >> x3::int_
                  >> (*(x3::int_ >> x3::int_))[setColorMap];
@@ -145,8 +150,11 @@ ReaderError::ReaderError(const std::string& message)
 {}
 
 ProblemInstance read(std::istream& is) {
-    return read(std::istreambuf_iterator<char>(is),
-                std::istreambuf_iterator<char>());
+    std::string description;
+    std::copy(std::istreambuf_iterator<char>(is),
+              std::istreambuf_iterator<char>(),
+              std::back_inserter(description));
+    return read(description);
 }
 
 ProblemInstance read(const std::string& description) {
