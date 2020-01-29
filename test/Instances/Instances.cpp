@@ -72,7 +72,7 @@ ListColoring::ProblemInstance sample() {
 }
 
 std::string getResource(std::string resourceName) {
-    std::ifstream fin("../res/" + resourceName + ".txt");
+    std::ifstream fin(RESOURCE_DIR "/" + resourceName + ".txt");
     return std::string(std::istreambuf_iterator<char>(fin),
                        std::istreambuf_iterator<char>());
 }
