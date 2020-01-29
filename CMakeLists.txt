@@ -11,11 +11,17 @@ add_subdirectory(ext/ODDs)
 add_library(ListColoring STATIC
     lib/ListColoring/ListColoring.cpp
     lib/ListColoring/LegacyWriter.cpp
-    lib/ListColoring/LegacyReader.cpp)
+    lib/ListColoring/LegacyReader.cpp
+    lib/ListColoring/Solver.cpp)
 target_include_directories(ListColoring PUBLIC lib/)
 target_include_directories(ListColoring PUBLIC ext/ODDs/lib/)
 target_compile_options(ListColoring PRIVATE -Wall -Wextra -Wshadow)
 target_link_libraries(ListColoring PUBLIC ODDs)
+
+add_executable(IsThereSolution apps/IsThereSolution.cpp)
+target_include_directories(IsThereSolution PUBLIC lib/)
+target_compile_options(IsThereSolution PRIVATE -Wall -Wextra -Wshadow)
+target_link_libraries(IsThereSolution PUBLIC ListColoring)
 
 if (NOT LIST_COLORING_DISABLE_TESTS)
     add_subdirectory(ext/googletest)
@@ -26,7 +32,8 @@ if (NOT LIST_COLORING_DISABLE_TESTS)
     add_executable(ListColoringTest
         test/Instances/Instances.cpp
         test/ListColoringClass.cpp
-        test/LegacyIO.cpp)
+        test/LegacyIO.cpp
+        test/Solver.cpp)
     target_include_directories(ListColoringTest PUBLIC lib/)
     target_include_directories(ListColoringTest PUBLIC test/)
     target_include_directories(ListColoringTest PUBLIC ext/ODDs/lib/)
