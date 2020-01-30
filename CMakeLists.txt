@@ -23,6 +23,11 @@ target_include_directories(IsThereSolution PUBLIC lib/)
 target_compile_options(IsThereSolution PRIVATE -Wall -Wextra -Wshadow)
 target_link_libraries(IsThereSolution PUBLIC ListColoring)
 
+add_executable(Solver apps/Solver.cpp)
+target_include_directories(Solver PUBLIC lib/)
+target_compile_options(Solver PRIVATE -Wall -Wextra -Wshadow)
+target_link_libraries(Solver PUBLIC ListColoring)
+
 if (NOT LIST_COLORING_DISABLE_TESTS)
     add_subdirectory(ext/googletest)
     enable_testing()

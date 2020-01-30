@@ -105,3 +105,39 @@ TEST(ListColoringClassTest, horizontalConstraint) {
     EXPECT_EQ(constraintEq, instance.horizontalConstraint(2, 3));
     EXPECT_TRUE(instance.horizontalConstraint(0, 0).empty());
 }
+
+TEST(ListColoringClassTest, solutionConstructor) {
+    ListColoring::Solution s(2, 3);
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            EXPECT_TRUE(s.get(i, j).empty());
+        }
+    }
+}
+
+namespace {
+
+std::string commaSep(int i, int j) {
+    std::ostringstream ss;
+    ss << i << "," << j;
+    return ss.str();
+}
+
+}
+
+TEST(ListColoringClassTest, solutionSetter) {
+    ListColoring::Solution s(2, 3);
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            s.get(i, j) = commaSep(i, j);
+        }
+    }
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            EXPECT_EQ(commaSep(i, j), s.get(i, j));
+        }
+    }
+}

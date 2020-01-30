@@ -3,15 +3,11 @@
 #include <ODDs/ODDs.h>
 #include <ODDs/Operations.h>
 
+#include <functional>
 #include <limits>
 #include <map>
 
 namespace ListColoring {
-
-Solver::Solver(const ProblemInstance& pi)
-    : instance_(std::cref(pi))
-{}
-
 namespace {
 
 ODDs::ODD firstRowODD(const ProblemInstance& instance) {
@@ -184,14 +180,167 @@ ODDs::ODD nextRow(const ProblemInstance& instance,
     return ODDs::minimize(builder.build());
 }
 
+using ODDPath = std::vector<ODDs::ODD::Symbol>;
+
+struct LastPathSearcher {
+    const ODDs::ODD& odd_;
+    ODDPath path;
+    std::vector<std::vector<bool>> vis;
+
+    LastPathSearcher(const ODDs::ODD& odd)
+      : odd_(odd)
+      , path(odd_.countLayers())
+      , vis(odd_.countLayers() + 1)
+    {
+        vis[0] = {false};
+        for (int i = 0; i < odd_.countLayers(); i++) {
+            vis[i + 1].resize(odd_.getLayer(i).rightStates);
+        }
+    }
+
+    bool find(int i = 0, int j = 0) {
+        vis[i][j] = true;
+        if (i == odd_.countLayers()) {
+            return odd_.finalStates().count(j);
+        }
+        int alphabetSize = odd_.getLayer(i).alphabet.symbols().size();
+        for (ODDs::ODD::Symbol symbol = 0; symbol < alphabetSize; symbol++) {
+            ODDs::ODD::Symbol to = odd_.getLayer(i).transitions.go(j, symbol);
+            if (vis[i + 1][to]) {
+                continue;
+            }
+            path[i] = symbol;
+            if (find(i + 1, to)) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+VColorMap transposedVColorMap(const Constraint& constraints) {
+    VColorMap ret;
+    for (const ConstraintOption& option : constraints) {
+        ret[option.second].push_back(option.first);
+    }
+    return ret;
 }
 
-bool Solver::isThereSolution() {
-    ODDs::ODD cur = firstRowODD(instance_);
-    for (int i = 1; i < instance_.get().height(); i++) {
-        cur = nextRow(instance_, cur, i);
+struct IntermediatePathSearcher {
+    const ODDs::ODD& odd_;
+    const ODDPath& prevPath_;
+    const ProblemInstance& instance_;
+    int row_;
+
+    ODDPath path;
+    std::vector<std::vector<bool>> vis;
+
+    IntermediatePathSearcher(const ODDs::ODD& odd,
+                             const ODDPath& prevPath,
+                             const ProblemInstance& instance,
+                             int row)
+        : odd_(odd)
+        , prevPath_(prevPath)
+        , instance_(instance)
+        , row_(row)
+        , path(odd_.countLayers())
+        , vis(odd_.countLayers() + 1)
+    {
+        vis[0] = {false};
+        for (int i = 0; i < odd_.countLayers(); i++) {
+            vis[i + 1].resize(odd_.getLayer(i).rightStates);
+        }
     }
-    return !cur.finalStates().empty();
+
+    bool find(int i = 0, int j = 0) {
+        vis[i][j] = true;
+        if (i == odd_.countLayers()) {
+            return odd_.finalStates().count(j);
+        }
+        const auto& vc = instance_.verticalConstraint(row_, i);
+        VColorMap map = transposedVColorMap(vc);
+        for (ODDs::ODD::Symbol symbol : map[prevPath_[i]]) {
+            ODDs::ODD::Symbol to = odd_.getLayer(i).transitions.go(j, symbol);
+            if (vis[i + 1][to]) {
+                continue;
+            }
+            path[i] = symbol;
+            if (find(i + 1, to)) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+}
+
+class Solver::Impl {
+public:
+    Impl(const ProblemInstance& instance)
+        : instance_(instance)
+    {}
+
+    ~Impl() = default;
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+    Impl(Impl&&) = default;
+    Impl& operator=(Impl&&) = default;
+
+    bool isThereSolution() {
+        odds_.push_back(firstRowODD(instance_));
+        for (int i = 1; i < instance_.get().height(); i++) {
+            odds_.push_back(nextRow(instance_, odds_.back(), i));
+        }
+        return !odds_.back().finalStates().empty();
+    }
+
+    Solution restoreSolution() {
+        Solution ret(instance_.get().height(), instance_.get().width());
+        LastPathSearcher lastPathSearcher(odds_.back());
+        assert(lastPathSearcher.find());
+        ODDPath path = lastPathSearcher.path;
+        insertPath(ret, instance_.get().height() - 1, path);
+        for (int i = instance_.get().height() - 2; i >= 0; i--) {
+            IntermediatePathSearcher searcher(odds_[i], path, instance_.get(), i);
+            assert(searcher.find());
+            path = searcher.path;
+            insertPath(ret, i, path);
+        }
+        return ret;
+    }
+
+private:
+    std::reference_wrapper<const ProblemInstance> instance_;
+    std::vector<ODDs::ODD> odds_;
+
+    void insertPath(Solution& s, int row, const ODDPath& path) {
+        for (int column = 0; column < instance_.get().width(); column++) {
+            const auto& colorMap = instance_.get().colorMap(row, column);
+            const auto& finalColors = instance_.get().finalColors(row, column);
+            ODDs::ODD::Symbol intermediateColor = path[column];
+            ODDs::ODD::Symbol finalColor = colorMap[intermediateColor];
+            s.get(row, column) = finalColors.numberToSymbol(finalColor);
+        }
+    }
+};
+
+Solver::Solver(const ProblemInstance& instance)
+    : impl_(std::make_unique<Impl>(instance))
+{}
+
+Solver::~Solver() = default;
+
+Solver::Solver(Solver&&) = default;
+
+Solver& Solver::operator=(Solver&&) = default;
+
+bool Solver::isThereSolution() {
+    return impl_->isThereSolution();
+}
+
+Solution Solver::restoreSolution() const {
+    return impl_->restoreSolution();
 }
 
 }

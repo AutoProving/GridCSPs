@@ -142,4 +142,28 @@ private:
     DynArray2D<Constraint> hconstraints_;
 };
 
+/**
+ * @brief Represents a solution to the problem as a matrix of final color names.
+ */
+class Solution {
+public:
+    /**
+     * @brief Constructs a matrix of empty strings of given size.
+     */
+    Solution(int height, int width);
+
+    /**
+     * @brief Non-constant getter for modifying the solution.
+     */
+    std::string& get(int i, int j);
+
+    /**
+     * @brief Constant getter for accessing the solution.
+     */
+    const std::string& get(int i, int j) const;
+
+private:
+    std::vector<std::vector<std::string>> solution_;
+};
+
 }

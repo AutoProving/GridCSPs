@@ -2,7 +2,7 @@
 
 #include <ListColoring/ListColoring.h>
 
-#include <functional>
+#include <memory>
 
 namespace ListColoring {
 
@@ -19,19 +19,27 @@ public:
      */
     Solver(const ProblemInstance& pi);
 
-    ~Solver() = default;
+    ~Solver();
     Solver(const Solver&) = delete;
     Solver& operator=(const Solver&) = delete;
-    Solver(Solver&&) = default;
-    Solver& operator=(Solver&&) = default;
+    Solver(Solver&&);
+    Solver& operator=(Solver&&);
 
     /**
      * @brief Checks an instance on solution existence.
      */
     bool isThereSolution();
 
+    /**
+     * @brief Restores a solution after the check if it exists.
+     *
+     * The behaviour is undefined in case it's called before isThereSolution.
+     */
+    Solution restoreSolution() const;
+
 private:
-    std::reference_wrapper<const ProblemInstance> instance_;
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 }

@@ -59,4 +59,16 @@ const Constraint& ProblemInstance::horizontalConstraint(int r, int c) const {
     return hconstraints_[r][c];
 }
 
+Solution::Solution(int height, int width)
+    : solution_(height, std::vector<std::string>(width))
+{}
+
+std::string& Solution::get(int i, int j) {
+    return solution_[i][j];
+}
+
+const std::string& Solution::get(int i, int j) const {
+    return solution_[i][j];
+}
+
 }
