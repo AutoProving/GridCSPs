@@ -288,7 +288,7 @@ public:
     Impl& operator=(Impl&&) = default;
 
     bool isThereSolution() {
-        odds_.push_back(firstRowODD(instance_));
+        odds_.push_back(ODDs::minimize(firstRowODD(instance_)));
         for (int i = 1; i < instance_.get().height(); i++) {
             odds_.push_back(nextRow(instance_, odds_.back(), i));
         }

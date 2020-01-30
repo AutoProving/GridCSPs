@@ -36,3 +36,20 @@ TEST(SolverTest, isThereSolutionSimpleNoSolution) {
     ListColoring::ProblemInstance instance = getInstance("simpleNoSolution");
     ASSERT_FALSE(ListColoring::Solver(instance).isThereSolution());
 }
+
+TEST(SolverTest, exampleRestoreSolution) {
+    ListColoring::ProblemInstance instance = getInstance("example");
+    std::vector<std::vector<std::string>> expected = {
+        {"BlueSquare", "BlueCircle", "BlueCircle", "RedSquare"},
+        {"BlueCircle", "Blank",      "Blank",      "RedCircle"},
+        {"RedSquare",  "RedCircle",  "RedCircle",  "BlueSquare"}
+    };
+    ListColoring::Solver solver(instance);
+    ASSERT_TRUE(solver.isThereSolution());
+    ListColoring::Solution solution = solver.restoreSolution();
+    for (int i = 0; i < instance.height(); i++) {
+        for (int j = 0; j < instance.width(); j++) {
+            EXPECT_EQ(expected[i][j], solution.get(i, j));
+        }
+    }
+}
