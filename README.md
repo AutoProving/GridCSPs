@@ -23,11 +23,21 @@ $ cmake ..
 $ make
 ```
 
+The solver will be available as `./Solver`.
+
 You can also run tests with the following command.
 
 ```
 $ make test
 ```
+
+## Usage
+
+The solver takes an instance from stdin. You can find the format example in [this file](listColoringExample.tex).
+
+If there's no solution, it prints "No solution".
+
+Otherwise, it prints rows of space-separated final color names — the solution.
 
 ## Building documentation
 
