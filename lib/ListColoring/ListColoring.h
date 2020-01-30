@@ -1,3 +1,23 @@
+// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <ODDs/ODDs.h>
@@ -21,12 +41,12 @@ using ColorMap = std::vector<Color>;
  *
  * Represents a possible option for constraint on edge ends' colors.
  */
-using ConstraintOption = std::pair<Color, Color>;
+using Constraint = std::pair<Color, Color>;
 
 /**
  * @brief A constraint on edge ends' colors.
  */
-using Constraint = std::set<ConstraintOption>;
+using ConstraintContainer = std::set<Constraint>;
 
 /**
  * @brief List Coloring instance
@@ -91,28 +111,28 @@ public:
      * @param r Row of top vertex of an edge.
      * @param c Column of top vertex of an edge.
      */
-    Constraint& verticalConstraint(int r, int c);
+    ConstraintContainer& verticalConstraints(int r, int c);
 
     /**
      * @brief Access a vertical constraint on an edge.
      * @param r Row of top vertex of an edge.
      * @param c Column of top vertex of an edge.
      */
-    const Constraint& verticalConstraint(int r, int c) const;
+    const ConstraintContainer& verticalConstraints(int r, int c) const;
 
     /**
      * @brief Access a horisontal constraint on an edge.
      * @param r Row of left vertex of an edge.
      * @param c Column of left vertex of an edge.
      */
-    Constraint& horizontalConstraint(int r, int c);
+    ConstraintContainer& horizontalConstraints(int r, int c);
 
     /**
      * @brief Access a horisontal constraint on an edge.
      * @param r Row of left vertex of an edge.
      * @param c Column of left vertex of an edge.
      */
-    const Constraint& horizontalConstraint(int r, int c) const;
+    const ConstraintContainer& horizontalConstraints(int r, int c) const;
 
 private:
     /**
@@ -138,8 +158,8 @@ private:
 
     int rows_, columns_;
     DynArray2D<VertexColorMapping> vcolors_;
-    DynArray2D<Constraint> vconstraints_;
-    DynArray2D<Constraint> hconstraints_;
+    DynArray2D<ConstraintContainer> vconstraints_;
+    DynArray2D<ConstraintContainer> hconstraints_;
 };
 
 /**

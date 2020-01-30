@@ -1,3 +1,23 @@
+// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <ListColoring/Solver.h>
 
 #include <ODDs/ODDs.h>
@@ -26,8 +46,8 @@ ODDs::ODD firstRowODD(const ProblemInstance& instance) {
     int rightSize = firstAlphabetSize;
     for (int i = 1; i < instance.width(); i++) {
         ODDs::ODD::TransitionContainer transitions;
-        const auto& constraints = instance.horizontalConstraint(0, i - 1);
-        for (const ConstraintOption& option : constraints) {
+        const auto& constraints = instance.horizontalConstraints(0, i - 1);
+        for (const Constraint& option : constraints) {
             transitions.insert({option.first, option.second, option.second});
         }
         rightSize = instance.intermediateColors(0, i).symbols().size();
@@ -47,9 +67,9 @@ ODDs::ODD firstRowODD(const ProblemInstance& instance) {
 
 using VColorMap = std::map<ODDs::ODD::Symbol, std::vector<ODDs::ODD::Symbol>>;
 
-VColorMap vColorMap(const Constraint& vconstraints) {
+VColorMap vColorMap(const ConstraintContainer& vconstraints) {
     VColorMap ret;
-    for (const ConstraintOption& option : vconstraints) {
+    for (const Constraint& option : vconstraints) {
         ret[option.first].push_back(option.second);
     }
     return ret;
@@ -110,7 +130,7 @@ StateStorage expandLeftLayer(const ProblemInstance& instance,
                              ODDs::ODDBuilder& builder,
                              int i) {
     const ODDs::ODD::Layer& up = odd.getLayer(0);
-    VColorMap vmap = vColorMap(instance.verticalConstraint(i - 1, 0));
+    VColorMap vmap = vColorMap(instance.verticalConstraints(i - 1, 0));
     ODDs::ODD::TransitionContainer transitions;
     StateStorage rightStates;
     for (const ODDs::ODD::Transition& transition : up.transitions) {
@@ -133,7 +153,7 @@ StateStorage expandLayer(const ProblemInstance& instance,
                          ODDs::ODDBuilder& builder,
                          int i, int j) {
     const ODDs::ODD::Layer& up = odd.getLayer(j);
-    VColorMap vmap = vColorMap(instance.verticalConstraint(i - 1, j));
+    VColorMap vmap = vColorMap(instance.verticalConstraints(i - 1, j));
     ODDs::ODD::TransitionContainer transitions;
     StateStorage rightStates;
     for (const ODDs::ODD::Transition& transition : up.transitions) {
@@ -143,7 +163,7 @@ StateStorage expandLayer(const ProblemInstance& instance,
             auto end_it = leftStates.upStateEnd(from);
             for (auto it = beg_it; it != end_it; it++) {
                 ODDs::ODD::Symbol m = it->first.second;
-                if (!instance.horizontalConstraint(i, j - 1).count({m, symbol}))
+                if (!instance.horizontalConstraints(i, j - 1).count({m, symbol}))
                     continue;
                 transitions.insert({
                     it->second,
@@ -218,9 +238,9 @@ struct LastPathSearcher {
     }
 };
 
-VColorMap transposedVColorMap(const Constraint& constraints) {
+VColorMap transposedVColorMap(const ConstraintContainer& constraints) {
     VColorMap ret;
-    for (const ConstraintOption& option : constraints) {
+    for (const Constraint& option : constraints) {
         ret[option.second].push_back(option.first);
     }
     return ret;
@@ -257,7 +277,7 @@ struct IntermediatePathSearcher {
         if (i == odd_.countLayers()) {
             return odd_.finalStates().count(j);
         }
-        const auto& vc = instance_.verticalConstraint(row_, i);
+        const auto& vc = instance_.verticalConstraints(row_, i);
         VColorMap map = transposedVColorMap(vc);
         for (ODDs::ODD::Symbol symbol : map[prevPath_[i]]) {
             ODDs::ODD::Symbol to = odd_.getLayer(i).transitions.go(j, symbol);

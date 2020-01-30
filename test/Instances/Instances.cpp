@@ -1,3 +1,23 @@
+// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <Instances/Instances.h>
 
 #include <fstream>
@@ -40,33 +60,33 @@ ListColoring::ProblemInstance sample() {
         }
     }
 
-    ListColoring::Constraint equal = {{0, 0}, {1, 1}};
-    ListColoring::Constraint notEqual = {{0, 1}, {1, 0}};
-    ListColoring::Constraint fstZero = {{0, 0}, {0, 1}};
-    ListColoring::Constraint sndZero = {{0, 0}, {1, 0}};
-    ListColoring::Constraint bothZero = {{0, 0}, {0, 0}};
+    ListColoring::ConstraintContainer equal = {{0, 0}, {1, 1}};
+    ListColoring::ConstraintContainer notEqual = {{0, 1}, {1, 0}};
+    ListColoring::ConstraintContainer fstZero = {{0, 0}, {0, 1}};
+    ListColoring::ConstraintContainer sndZero = {{0, 0}, {1, 0}};
+    ListColoring::ConstraintContainer bothZero = {{0, 0}, {0, 0}};
 
-    instance.verticalConstraint(0, 0) = equal;
-    instance.verticalConstraint(0, 1) = sndZero;
-    instance.verticalConstraint(0, 2) = sndZero;
-    instance.verticalConstraint(0, 3) = fstZero;
+    instance.verticalConstraints(0, 0) = equal;
+    instance.verticalConstraints(0, 1) = sndZero;
+    instance.verticalConstraints(0, 2) = sndZero;
+    instance.verticalConstraints(0, 3) = fstZero;
     
-    instance.verticalConstraint(1, 0) = notEqual;
-    instance.verticalConstraint(1, 1) = fstZero;
-    instance.verticalConstraint(1, 2) = fstZero;
-    instance.verticalConstraint(1, 3) = notEqual;
+    instance.verticalConstraints(1, 0) = notEqual;
+    instance.verticalConstraints(1, 1) = fstZero;
+    instance.verticalConstraints(1, 2) = fstZero;
+    instance.verticalConstraints(1, 3) = notEqual;
 
-    instance.horizontalConstraint(0, 0) = equal;
-    instance.horizontalConstraint(0, 1) = equal;
-    instance.horizontalConstraint(0, 2) = notEqual;
+    instance.horizontalConstraints(0, 0) = equal;
+    instance.horizontalConstraints(0, 1) = equal;
+    instance.horizontalConstraints(0, 2) = notEqual;
 
-    instance.horizontalConstraint(1, 0) = sndZero;
-    instance.horizontalConstraint(1, 1) = bothZero;
-    instance.horizontalConstraint(1, 2) = fstZero;
+    instance.horizontalConstraints(1, 0) = sndZero;
+    instance.horizontalConstraints(1, 1) = bothZero;
+    instance.horizontalConstraints(1, 2) = fstZero;
 
-    instance.horizontalConstraint(2, 0) = equal;
-    instance.horizontalConstraint(2, 1) = equal;
-    instance.horizontalConstraint(2, 2) = notEqual;
+    instance.horizontalConstraints(2, 0) = equal;
+    instance.horizontalConstraints(2, 1) = equal;
+    instance.horizontalConstraints(2, 2) = notEqual;
 
     return instance;
 }

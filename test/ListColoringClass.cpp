@@ -1,3 +1,23 @@
+// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <gtest/gtest.h>
 #include <ListColoring/ListColoring.h>
 
@@ -69,41 +89,41 @@ TEST(ListColoringClassTest, colorMap) {
 }
 
 TEST(ListColoringClassTest, verticalConstraint) {
-    ListColoring::Constraint constraintEq = {
+    ListColoring::ConstraintContainer constraintEq = {
         {0, 0},
         {1, 1}
     };
-    ListColoring::Constraint constraintNotEq = {
+    ListColoring::ConstraintContainer constraintNotEq = {
         {0, 1},
         {1, 0}
     };
     ListColoring::ProblemInstance instance(3, 5);
-    instance.verticalConstraint(1, 0) = constraintEq;
-    instance.verticalConstraint(0, 4) = constraintNotEq;
-    instance.verticalConstraint(1, 4) = constraintEq;
-    EXPECT_EQ(constraintEq, instance.verticalConstraint(1, 0));
-    EXPECT_EQ(constraintNotEq, instance.verticalConstraint(0, 4));
-    EXPECT_EQ(constraintEq, instance.verticalConstraint(1, 4));
-    EXPECT_TRUE(instance.verticalConstraint(0, 0).empty());
+    instance.verticalConstraints(1, 0) = constraintEq;
+    instance.verticalConstraints(0, 4) = constraintNotEq;
+    instance.verticalConstraints(1, 4) = constraintEq;
+    EXPECT_EQ(constraintEq, instance.verticalConstraints(1, 0));
+    EXPECT_EQ(constraintNotEq, instance.verticalConstraints(0, 4));
+    EXPECT_EQ(constraintEq, instance.verticalConstraints(1, 4));
+    EXPECT_TRUE(instance.verticalConstraints(0, 0).empty());
 }
 
 TEST(ListColoringClassTest, horizontalConstraint) {
-    ListColoring::Constraint constraintEq = {
+    ListColoring::ConstraintContainer constraintEq = {
         {0, 0},
         {1, 1}
     };
-    ListColoring::Constraint constraintNotEq = {
+    ListColoring::ConstraintContainer constraintNotEq = {
         {0, 1},
         {1, 0}
     };
     ListColoring::ProblemInstance instance(3, 5);
-    instance.horizontalConstraint(2, 0) = constraintEq;
-    instance.horizontalConstraint(0, 3) = constraintNotEq;
-    instance.horizontalConstraint(2, 3) = constraintEq;
-    EXPECT_EQ(constraintEq, instance.horizontalConstraint(2, 0));
-    EXPECT_EQ(constraintNotEq, instance.horizontalConstraint(0, 3));
-    EXPECT_EQ(constraintEq, instance.horizontalConstraint(2, 3));
-    EXPECT_TRUE(instance.horizontalConstraint(0, 0).empty());
+    instance.horizontalConstraints(2, 0) = constraintEq;
+    instance.horizontalConstraints(0, 3) = constraintNotEq;
+    instance.horizontalConstraints(2, 3) = constraintEq;
+    EXPECT_EQ(constraintEq, instance.horizontalConstraints(2, 0));
+    EXPECT_EQ(constraintNotEq, instance.horizontalConstraints(0, 3));
+    EXPECT_EQ(constraintEq, instance.horizontalConstraints(2, 3));
+    EXPECT_TRUE(instance.horizontalConstraints(0, 0).empty());
 }
 
 TEST(ListColoringClassTest, solutionConstructor) {
