@@ -23,6 +23,7 @@
 #include <ODDs/ODDs.h>
 #include <ODDs/Operations.h>
 
+#include <cassert>
 #include <functional>
 #include <limits>
 #include <map>

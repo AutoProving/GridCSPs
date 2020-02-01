@@ -3,6 +3,7 @@
 #include <ListColoring/Instances.h>
 
 #include <iostream>
+#include <cstring>
 
 int pigeonhole(int argc, char* argv[]) {
     if (argc < 4) {
