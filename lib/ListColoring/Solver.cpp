@@ -312,6 +312,12 @@ public:
         for (int i = 1; i < instance_.get().height(); i++) {
             odds_.push_back(nextRow(instance_, odds_.back(), i));
         }
+        int mx = 0;
+        for (ODDs::ODD& odd : odds_) {
+            for (int i = 0; i < odd.countLayers(); i++)
+                mx = std::max(mx, odd.getLayer(i).width());
+        }
+        std::cout << mx << std::endl;
         return !odds_.back().finalStates().empty();
     }
 

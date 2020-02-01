@@ -12,7 +12,8 @@ add_library(ListColoring STATIC
     lib/ListColoring/ListColoring.cpp
     lib/ListColoring/LegacyWriter.cpp
     lib/ListColoring/LegacyReader.cpp
-    lib/ListColoring/Solver.cpp)
+    lib/ListColoring/Solver.cpp
+    lib/ListColoring/Instances.cpp)
 target_include_directories(ListColoring PUBLIC lib/)
 target_include_directories(ListColoring PUBLIC ext/ODDs/lib/)
 target_compile_options(ListColoring PRIVATE -Wall -Wextra -Wshadow)
@@ -27,6 +28,11 @@ add_executable(Solver apps/Solver.cpp)
 target_include_directories(Solver PUBLIC lib/)
 target_compile_options(Solver PRIVATE -Wall -Wextra -Wshadow)
 target_link_libraries(Solver PUBLIC ListColoring)
+
+add_executable(Instance apps/Instance.cpp)
+target_include_directories(Instance PUBLIC lib/)
+target_compile_options(Instance PRIVATE -Wall -Wextra -Wshadow)
+target_link_libraries(Instance PUBLIC ListColoring)
 
 if (NOT LIST_COLORING_DISABLE_TESTS)
     add_subdirectory(ext/googletest)
