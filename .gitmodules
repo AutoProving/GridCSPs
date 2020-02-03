@@ -1,0 +1,6 @@
+[submodule "ext/ODDs"]
+	path = ext/ODDs
+	url = https://github.com/mateusoliveiraoliveira/ODDs
+[submodule "ext/googletest"]
+	path = ext/googletest
+	url = https://github.com/google/googletest
