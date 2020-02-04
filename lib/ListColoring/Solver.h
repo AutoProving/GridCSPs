@@ -22,9 +22,44 @@
 
 #include <ListColoring/ListColoring.h>
 
+#include <ODDs/ODDs.h>
+
 #include <memory>
 
 namespace ListColoring {
+
+/**
+ * @brief A base class for solver statistics collectors.
+ *
+ * A descendant of this class can be appointed to a Solver to be trigerred on
+ * solver events. By default, a trivial mocked object that does nothing is
+ * appointed.
+ */
+class SolverStatsBase {
+public:
+    virtual ~SolverStatsBase() = default;
+
+    /**
+     * @brief Trigger for a raw ODD.
+     *
+     * Triggered every time a solver produces a raw (not yet minimized) ODD.
+     */
+    virtual void onRawODD(const ODDs::ODD& rawODD) = 0;
+
+    /**
+     * @brief Trigger for a determinate ODD.
+     *
+     * Triggered every time an ODD is determinized but not yet minimized.
+     */
+    virtual void onDeterminateODD(const ODDs::ODD& powsetODD) = 0;
+
+    /**
+     * @brief Trigger for a minimal ODD.
+     *
+     * Triggered every time a solver produses a minimized ODD.
+     */
+    virtual void onMinimizedODD(const ODDs::ODD& minimizedODD) = 0;
+};
 
 /**
  * @brief Solves the List Coloring problem.
@@ -36,8 +71,19 @@ public:
      *
      * A referred instance is stored by reference and should live at least
      * until the Solver is destroyed.
+     *
+     * Sets the stats reference to a fake mock object.
      */
     Solver(const ProblemInstance& pi);
+
+    /**
+     * @brief Constructs a solver from a reference to an instance and a stats
+     * handle.
+     *
+     * The referred instance and stats handle are stored by reference and
+     * should live at least until the Solver is destroyed.
+     */
+    Solver(const ProblemInstance& pi, SolverStatsBase& stats);
 
     ~Solver();
     Solver(const Solver&) = delete;

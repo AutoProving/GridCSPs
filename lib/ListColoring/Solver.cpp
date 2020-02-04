@@ -179,7 +179,7 @@ StateStorage expandLayer(const ProblemInstance& instance,
         transitions,
         rightStates.size()
     );
-     return rightStates;
+    return rightStates;
 }
 
 ODDs::ODD nextRow(const ProblemInstance& instance,
@@ -198,7 +198,7 @@ ODDs::ODD nextRow(const ProblemInstance& instance,
         }
     }
     builder.setFinalStates(finalStates);
-    return ODDs::minimize(builder.build());
+    return builder.build();
 }
 
 using ODDPath = std::vector<ODDs::ODD::Symbol>;
@@ -294,12 +294,77 @@ struct IntermediatePathSearcher {
     }
 };
 
+/**
+ * @brief Base class for the two options to store stats.
+ */
+class StatsStorageBase {
+public:
+    virtual ~StatsStorageBase() = default;
+
+    virtual SolverStatsBase& get() = 0;
+};
+
+/**
+ * @brief Stores a reference to SolverStats
+ */
+class RefStatsStorage : public StatsStorageBase {
+public:
+    RefStatsStorage(SolverStatsBase& wrapped)
+        : wrapper_(wrapped)
+    {}
+
+    virtual ~RefStatsStorage() = default;
+
+    virtual SolverStatsBase& get() override {
+        return wrapper_.get();
+    }
+
+private:
+    std::reference_wrapper<SolverStatsBase> wrapper_;
+};
+
+/**
+ * @brief Stores SolverStats by value
+ */
+template<class Stats>
+class ValueStatsStorage : public StatsStorageBase {
+public:
+    template<class... Args>
+    ValueStatsStorage(Args&&... args)
+        : stored_(std::forward<Args>(args)...)
+    {}
+
+    virtual ~ValueStatsStorage() = default;
+
+    virtual SolverStatsBase& get() override {
+        return stored_;
+    }
+
+private:
+    Stats stored_;
+};
+
+class MockSolverStats : public SolverStatsBase {
+public:
+    virtual ~MockSolverStats() = default;
+
+    virtual void onRawODD(const ODDs::ODD&) override {}
+    virtual void onDeterminateODD(const ODDs::ODD&) override {}
+    virtual void onMinimizedODD(const ODDs::ODD&) override {}
+};
+
 }
 
 class Solver::Impl {
 public:
     Impl(const ProblemInstance& instance)
         : instance_(instance)
+        , stats_(std::make_unique<ValueStatsStorage<MockSolverStats>>())
+    {}
+
+    Impl(const ProblemInstance& instance, SolverStatsBase& stats)
+        : instance_(instance)
+        , stats_(std::make_unique<RefStatsStorage>(stats))
     {}
 
     ~Impl() = default;
@@ -309,28 +374,24 @@ public:
     Impl& operator=(Impl&&) = default;
 
     bool isThereSolution() {
-        odds_.push_back(ODDs::minimize(firstRowODD(instance_)));
+        addODD(firstRowODD(instance_));
         for (int i = 1; i < instance_.get().height(); i++) {
-            odds_.push_back(nextRow(instance_, odds_.back(), i));
+            addODD(nextRow(instance_, odds_.back(), i));
         }
-        int mx = 0;
-        for (ODDs::ODD& odd : odds_) {
-            for (int i = 0; i < odd.countLayers(); i++)
-                mx = std::max(mx, odd.getLayer(i).width());
-        }
-        std::cout << mx << std::endl;
         return !odds_.back().finalStates().empty();
     }
 
     Solution restoreSolution() {
         Solution ret(instance_.get().height(), instance_.get().width());
         LastPathSearcher lastPathSearcher(odds_.back());
-        assert(lastPathSearcher.find());
+        bool success = lastPathSearcher.find();
+        assert(success);
         ODDPath path = lastPathSearcher.path;
         insertPath(ret, instance_.get().height() - 1, path);
         for (int i = instance_.get().height() - 2; i >= 0; i--) {
             IntermediatePathSearcher searcher(odds_[i], path, instance_.get(), i);
-            assert(searcher.find());
+            success = searcher.find();
+            assert(success);
             path = searcher.path;
             insertPath(ret, i, path);
         }
@@ -339,7 +400,17 @@ public:
 
 private:
     std::reference_wrapper<const ProblemInstance> instance_;
+    std::unique_ptr<StatsStorageBase> stats_;
     std::vector<ODDs::ODD> odds_;
+
+    void addODD(ODDs::ODD&& odd) {
+        stats_->get().onRawODD(odd);
+        odd = ODDs::diagramLazyPowerSet(odd);
+        stats_->get().onDeterminateODD(odd);
+        odd = ODDs::minimize(odd);
+        stats_->get().onMinimizedODD(odd);
+        odds_.push_back(odd);
+    }
 
     void insertPath(Solution& s, int row, const ODDPath& path) {
         for (int column = 0; column < instance_.get().width(); column++) {
@@ -354,6 +425,10 @@ private:
 
 Solver::Solver(const ProblemInstance& instance)
     : impl_(std::make_unique<Impl>(instance))
+{}
+
+Solver::Solver(const ProblemInstance& instance, SolverStatsBase& stats)
+    : impl_(std::make_unique<Impl>(instance, stats))
 {}
 
 Solver::~Solver() = default;
