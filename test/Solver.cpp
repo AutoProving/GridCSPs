@@ -73,3 +73,42 @@ TEST(SolverTest, exampleRestoreSolution) {
         }
     }
 }
+
+namespace {
+
+class CountSolverStats : public ListColoring::SolverStatsBase {
+public:
+    CountSolverStats() = default;
+    virtual ~CountSolverStats() = default;
+
+    virtual void onRawODD(const ODDs::ODD&) override {
+        rawCnt_++;
+    }
+
+    virtual void onMinimizedODD(const ODDs::ODD&) override {
+        minCnt_++;
+    }
+
+    int rawCnt() const {
+        return rawCnt_;
+    }
+
+    int minCnt() const {
+        return minCnt_;
+    }
+
+private:
+    int rawCnt_ = 0;
+    int minCnt_ = 0;
+};
+
+}
+
+TEST(SolverTest, solverStats) {
+    ListColoring::ProblemInstance instance = getInstance("example");
+    CountSolverStats stats;
+    ListColoring::Solver solver(instance, stats);
+    ASSERT_TRUE(solver.isThereSolution());
+    EXPECT_EQ(3, stats.rawCnt());
+    EXPECT_EQ(3, stats.minCnt());
+}
