@@ -325,12 +325,14 @@ public:
     Solution restoreSolution() {
         Solution ret(instance_.get().height(), instance_.get().width());
         LastPathSearcher lastPathSearcher(odds_.back());
-        assert(lastPathSearcher.find());
+        bool success = lastPathSearcher.find();
+        assert(success);
         ODDPath path = lastPathSearcher.path;
         insertPath(ret, instance_.get().height() - 1, path);
         for (int i = instance_.get().height() - 2; i >= 0; i--) {
             IntermediatePathSearcher searcher(odds_[i], path, instance_.get(), i);
-            assert(searcher.find());
+            success = searcher.find();
+            assert(success);
             path = searcher.path;
             insertPath(ret, i, path);
         }
