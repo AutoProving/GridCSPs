@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include <ListColoring/Solver.h>
 #include <ListColoring/LegacyReader.h>
+#include <ListColoring/Instances.h>
 
 #include <Instances/Instances.h>
 
@@ -121,4 +122,29 @@ TEST(SolverTest, solverStats) {
     EXPECT_EQ(3, stats.rawCnt());
     EXPECT_EQ(3, stats.detCnt());
     EXPECT_EQ(3, stats.minCnt());
+}
+
+TEST(SolverTest, pigeonhole_10_10) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 10);
+    ASSERT_TRUE(ListColoring::Solver(instance).isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_5_15) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(5, 15);
+    ASSERT_TRUE(ListColoring::Solver(instance).isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_15_5) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(15, 5);
+    ASSERT_FALSE(ListColoring::Solver(instance).isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_10_9) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 9);
+    ASSERT_FALSE(ListColoring::Solver(instance).isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_1_1) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(1, 1);
+    ASSERT_TRUE(ListColoring::Solver(instance).isThereSolution());
 }
