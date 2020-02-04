@@ -22,11 +22,57 @@
 #include <ListColoring/LegacyReader.h>
 #include <ListColoring/Solver.h>
 
+#include <cassert>
 #include <iostream>
+
+namespace {
+
+int width(const ODDs::ODD& odd) {
+    int ret = 0;
+    for (int i = 0; i < odd.countLayers(); i++) {
+        ret = std::max(ret, odd.getLayer(i).width());
+    }
+    return ret;
+}
+
+class SolverStats : public ListColoring::SolverStatsBase {
+public:
+    struct RowStat {
+        int rawWidth;
+        int minWidth;
+    };
+
+    SolverStats() = default;
+    virtual ~SolverStats() = default;
+
+    virtual void onRawODD(const ODDs::ODD& odd) override {
+        rawWidths_.push_back(width(odd));
+    }
+
+    virtual void onMinimizedODD(const ODDs::ODD& odd) override {
+        minWidths_.push_back(width(odd));
+    }
+
+    std::vector<RowStat> collect() const {
+        assert(rawWidths_.size() == minWidths_.size());
+        std::vector<RowStat> ret(rawWidths_.size());
+        for (int i = 0; i < (int)rawWidths_.size(); i++) {
+            ret[i] = {rawWidths_[i], minWidths_[i]};
+        }
+        return ret;
+    }
+
+private:
+    std::vector<int> rawWidths_;
+    std::vector<int> minWidths_;
+};
+
+}
 
 int main() {
     ListColoring::ProblemInstance pi = ListColoring::Legacy::read(std::cin);
-    ListColoring::Solver solver(pi);
+    SolverStats stats;
+    ListColoring::Solver solver(pi, stats);
     if (!solver.isThereSolution()) {
         std::cout << "No solution" << std::endl;
         return 0;
@@ -36,6 +82,14 @@ int main() {
         for (int j = 0; j < pi.width(); j++)
             std::cout << solution.get(i, j) << " ";
         std::cout << std::endl;
+    }
+    auto rows = stats.collect();
+    std::cout << std::endl
+              << "Solver stats: " << std::endl;
+    for (int i = 0; i < (int)rows.size(); i++) {
+        std::cout << "Row " << i << ": "
+                  << "rawWidth = " << rows[i].rawWidth << " "
+                  << "minWidth = " << rows[i].minWidth << std::endl;
     }
     return 0;
 }
