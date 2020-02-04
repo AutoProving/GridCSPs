@@ -39,6 +39,7 @@ class SolverStats : public ListColoring::SolverStatsBase {
 public:
     struct RowStat {
         int rawWidth;
+        int detWidth;
         int minWidth;
     };
 
@@ -49,21 +50,27 @@ public:
         rawWidths_.push_back(width(odd));
     }
 
+    virtual void onDeterminateODD(const ODDs::ODD& odd) override {
+        detWidths_.push_back(width(odd));
+    }
+
     virtual void onMinimizedODD(const ODDs::ODD& odd) override {
         minWidths_.push_back(width(odd));
     }
 
     std::vector<RowStat> collect() const {
+        assert(rawWidths_.size() == detWidths_.size());
         assert(rawWidths_.size() == minWidths_.size());
         std::vector<RowStat> ret(rawWidths_.size());
         for (int i = 0; i < (int)rawWidths_.size(); i++) {
-            ret[i] = {rawWidths_[i], minWidths_[i]};
+            ret[i] = {rawWidths_[i], detWidths_[i], minWidths_[i]};
         }
         return ret;
     }
 
 private:
     std::vector<int> rawWidths_;
+    std::vector<int> detWidths_;
     std::vector<int> minWidths_;
 };
 
@@ -89,6 +96,7 @@ int main() {
     for (int i = 0; i < (int)rows.size(); i++) {
         std::cout << "Row " << i << ": "
                   << "rawWidth = " << rows[i].rawWidth << " "
+                  << "detWidth = " << rows[i].detWidth << " "
                   << "minWidth = " << rows[i].minWidth << std::endl;
     }
     return 0;

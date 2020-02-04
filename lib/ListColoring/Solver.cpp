@@ -349,6 +349,7 @@ public:
     virtual ~MockSolverStats() = default;
 
     virtual void onRawODD(const ODDs::ODD&) override {}
+    virtual void onDeterminateODD(const ODDs::ODD&) override {}
     virtual void onMinimizedODD(const ODDs::ODD&) override {}
 };
 
@@ -404,6 +405,8 @@ private:
 
     void addODD(ODDs::ODD&& odd) {
         stats_->get().onRawODD(odd);
+        odd = ODDs::diagramLazyPowerSet(odd);
+        stats_->get().onDeterminateODD(odd);
         odd = ODDs::minimize(odd);
         stats_->get().onMinimizedODD(odd);
         odds_.push_back(odd);

@@ -45,7 +45,14 @@ public:
      * Triggered every time a solver produces a raw (not yet minimized) ODD.
      */
     virtual void onRawODD(const ODDs::ODD& rawODD) = 0;
-    
+
+    /**
+     * @brief Trigger for a determinate ODD.
+     *
+     * Triggered every time an ODD is determinized but not yet minimized.
+     */
+    virtual void onDeterminateODD(const ODDs::ODD& powsetODD) = 0;
+
     /**
      * @brief Trigger for a minimal ODD.
      *

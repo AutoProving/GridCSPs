@@ -85,6 +85,10 @@ public:
         rawCnt_++;
     }
 
+    virtual void onDeterminateODD(const ODDs::ODD&) override {
+        detCnt_++;
+    }
+
     virtual void onMinimizedODD(const ODDs::ODD&) override {
         minCnt_++;
     }
@@ -93,12 +97,17 @@ public:
         return rawCnt_;
     }
 
+    int detCnt() const {
+        return detCnt_;
+    }
+
     int minCnt() const {
         return minCnt_;
     }
 
 private:
     int rawCnt_ = 0;
+    int detCnt_ = 0;
     int minCnt_ = 0;
 };
 
@@ -110,5 +119,6 @@ TEST(SolverTest, solverStats) {
     ListColoring::Solver solver(instance, stats);
     ASSERT_TRUE(solver.isThereSolution());
     EXPECT_EQ(3, stats.rawCnt());
+    EXPECT_EQ(3, stats.detCnt());
     EXPECT_EQ(3, stats.minCnt());
 }
