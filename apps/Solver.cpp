@@ -21,11 +21,50 @@
 #include <ListColoring/ListColoring.h>
 #include <ListColoring/LegacyReader.h>
 #include <ListColoring/Solver.h>
+#include <ListColoring/SpaceReduction.h>
 
 #include <cassert>
+#include <cstring>
+#include <iomanip>
 #include <iostream>
+#include <set>
 
 namespace {
+
+/**
+ * XXX: The only reason why a library isn't used for this reason is that the
+ * usecase is way too simple for adding external dependencies. In future, if
+ * this class will need more functionality, better switch to an external
+ * library.
+ */
+class ArgumentParser {
+public:
+    class BadArgument : public std::runtime_error {
+    public:
+        BadArgument(const std::string& message)
+            : std::runtime_error(message)
+        {}
+    };
+
+    ArgumentParser() = default;
+    ~ArgumentParser() = default;
+
+    void parse(int argc, char* argv[]) {
+        for (int i = 1; i < argc; i++) {
+            if (std::strlen(argv[i]) < 2 || std::strncmp(argv[i], "--", 2)) {
+                throw BadArgument("Arguments should start with '--'");
+            }
+            flags_.insert(argv[i] + 2);
+        }
+    }
+
+    bool isSet(const std::string& name) {
+        return flags_.count(name);
+    }
+
+private:
+    std::set<std::string> flags_;
+};
 
 int width(const ODDs::ODD& odd) {
     int ret = 0;
@@ -74,30 +113,130 @@ private:
     std::vector<int> minWidths_;
 };
 
-}
-
-int main() {
-    ListColoring::ProblemInstance pi = ListColoring::Legacy::read(std::cin);
+int justSolve(const ListColoring::ProblemInstance& pi, bool quiet) {
     SolverStats stats;
     ListColoring::Solver solver(pi, stats);
     if (!solver.isThereSolution()) {
         std::cout << "No solution" << std::endl;
-        return 0;
+    } else {
+        ListColoring::Solution solution = solver.restoreSolution();
+        for (int i = 0; i < pi.height(); i++) {
+            for (int j = 0; j < pi.width(); j++)
+                std::cout << solution.get(i, j) << " ";
+            std::cout << std::endl;
+        }
     }
-    ListColoring::Solution solution = solver.restoreSolution();
-    for (int i = 0; i < pi.height(); i++) {
-        for (int j = 0; j < pi.width(); j++)
-            std::cout << solution.get(i, j) << " ";
-        std::cout << std::endl;
-    }
-    auto rows = stats.collect();
-    std::cout << std::endl
-              << "Solver stats: " << std::endl;
-    for (int i = 0; i < (int)rows.size(); i++) {
-        std::cout << "Row " << i << ": "
-                  << "rawWidth = " << rows[i].rawWidth << " "
-                  << "detWidth = " << rows[i].detWidth << " "
-                  << "minWidth = " << rows[i].minWidth << std::endl;
+    if (!quiet) {
+        auto rows = stats.collect();
+        std::cout << std::endl
+                  << "Solver stats: " << std::endl;
+        for (int i = 0; i < (int)rows.size(); i++) {
+            std::cout << "Row " << i << ": "
+                      << "rawWidth = " << rows[i].rawWidth << " "
+                      << "detWidth = " << rows[i].detWidth << " "
+                      << "minWidth = " << rows[i].minWidth << std::endl;
+        }
     }
     return 0;
+}
+
+class SolverStatsAggregator {
+public:
+    struct RowStat {
+        double rawWidth = 0;
+        double detWidth = 0;
+        double minWidth = 0;
+    };
+
+    struct Stats {
+        int calls;
+        std::vector<RowStat> rows;
+    };
+
+    void addStats(const SolverStats& stats) {
+        calls_++;
+        auto rows = stats.collect();
+        rows_.resize(rows.size());
+        for (int i = 0; i < (int)rows_.size(); i++) {
+            rows_[i].rawWidth += rows[i].rawWidth;
+            rows_[i].detWidth += rows[i].detWidth;
+            rows_[i].minWidth += rows[i].minWidth;
+        }
+    }
+
+    Stats collect() {
+        Stats ret { calls_, rows_ };
+        for (auto& stat : ret.rows) {
+            stat.rawWidth /= calls_;
+            stat.detWidth /= calls_;
+            stat.minWidth /= calls_;
+        }
+        return ret;
+    }
+
+private:
+    int calls_ = 0;
+    std::vector<RowStat> rows_;
+};
+
+int reduceAndSolve(const ListColoring::ProblemInstance& pi, bool quiet) {
+    ListColoring::SpaceReduction sr(pi);
+    SolverStatsAggregator statsAgg;
+    std::optional<ListColoring::Solution> solution;
+    while (!solution.has_value()) {
+        auto instance = sr.nextInstance();
+        if (!instance.has_value()) {
+            break;
+        }
+        SolverStats stats;
+        ListColoring::Solver solver(instance.value(), stats);
+        if (solver.isThereSolution()) {
+            solution = sr.restoreSolution(solver.restoreSolution());
+        }
+        statsAgg.addStats(stats);
+    }
+    if (!solution.has_value()) {
+        std::cout << "No solution" << std::endl;
+    } else {
+        for (int i = 0; i < pi.height(); i++) {
+            for (int j = 0; j < pi.width(); j++)
+                std::cout << solution.value().get(i, j) << " ";
+            std::cout << std::endl;
+        }
+    }
+    if (!quiet) {
+        auto stats = statsAgg.collect();
+        std::cout << std::endl
+                  << "Average solver stats over " << stats.calls << " launches: " << std::endl;
+        for (int i = 0; i < (int)stats.rows.size(); i++) {
+            std::cout << std::setprecision(3)
+                      << std::fixed
+                      << "Row " << i << ": "
+                      << "rawWidth = " << stats.rows[i].rawWidth << " "
+                      << "detWidth = " << stats.rows[i].detWidth << " "
+                      << "minWidth = " << stats.rows[i].minWidth << std::endl;
+        }
+    }
+    return 0;
+}
+
+}
+
+int main(int argc, char* argv[]) {
+    ArgumentParser args;
+    try {
+        args.parse(argc, argv);
+    } catch (ArgumentParser::BadArgument& e) {
+        std::cerr << e.what() << std::endl;
+        return 2;
+    }
+
+    ListColoring::ProblemInstance pi = ListColoring::Legacy::read(std::cin);
+
+    bool quiet = args.isSet("quiet");
+    if (args.isSet("reduce-space")) {
+        return reduceAndSolve(pi, quiet);
+    } else {
+        return justSolve(pi, quiet);
+    }
 }
