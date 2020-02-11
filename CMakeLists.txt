@@ -13,6 +13,7 @@ add_library(ListColoring STATIC
     lib/ListColoring/LegacyWriter.cpp
     lib/ListColoring/LegacyReader.cpp
     lib/ListColoring/Solver.cpp
+    lib/ListColoring/SpaceReduction.cpp
     lib/ListColoring/Instances.cpp)
 target_include_directories(ListColoring PUBLIC lib/)
 target_include_directories(ListColoring PUBLIC ext/ODDs/lib/)
@@ -44,7 +45,8 @@ if (NOT LIST_COLORING_DISABLE_TESTS)
         test/Instances/Instances.cpp
         test/ListColoringClass.cpp
         test/LegacyIO.cpp
-        test/Solver.cpp)
+        test/Solver.cpp
+        test/SpaceReduction.cpp)
     target_include_directories(ListColoringTest PUBLIC lib/)
     target_include_directories(ListColoringTest PUBLIC test/)
     target_include_directories(ListColoringTest PUBLIC ext/ODDs/lib/)

@@ -374,6 +374,12 @@ public:
     Impl& operator=(Impl&&) = default;
 
     bool isThereSolution() {
+        for (int i = 0; i < instance_.get().height(); i++) {
+            for (int j = 0; j < instance_.get().width(); j++) {
+                if (instance_.get().intermediateColors(i, j).symbols().empty())
+                    return false;
+            }
+        }
         addODD(firstRowODD(instance_));
         for (int i = 1; i < instance_.get().height(); i++) {
             addODD(nextRow(instance_, odds_.back(), i));

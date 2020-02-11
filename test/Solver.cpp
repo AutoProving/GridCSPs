@@ -148,3 +148,8 @@ TEST(SolverTest, pigeonhole_1_1) {
     ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(1, 1);
     ASSERT_TRUE(ListColoring::Solver(instance).isThereSolution());
 }
+
+TEST(SolverTest, emptyAlphabet) {
+    ListColoring::ProblemInstance instance(1, 1);
+    ASSERT_FALSE(ListColoring::Solver(instance).isThereSolution());
+}
