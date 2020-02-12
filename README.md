@@ -4,9 +4,10 @@ A List Coloring solver.
 
 ## Build instructions
 
-External dependencies of the library are exported as git submodules in `ext/` subdirectory. Currently there is only one dependency:
+External dependencies of the library are exported as git submodules in `ext/` subdirectory. There are several dependencies.
 
 * [Google Test](https://github.com/google/googletest/) framework is used for unit tests.
+* [ODDs](https://github.com/mateusoliveiraoliveira/ODDs) is used by solver, as it heavily exploits Ordered Decision Diagrams.
 
 To clone the dependencies to supposed locations, just type the following command after cloning this repository.
 
@@ -38,6 +39,13 @@ The solver takes an instance from stdin. You can find the format example in [thi
 If there's no solution, it prints "No solution".
 
 Otherwise, it prints rows of space-separated final color names — the solution.
+
+After that, it prints the statistics: width of ODDs used in each row of the intstance.
+
+The solver also accepts command line arguments:
+
+* If `--quiet` flag is passed, the solver only prints the solution without the statistics.
+* If `--reduce-space` flag is passed, the solver attempts to reduce the space consumption (might be reasonable for almost-square images)
 
 ## Building documentation
 
