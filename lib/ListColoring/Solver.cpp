@@ -24,6 +24,7 @@
 #include <ODDs/Operations.h>
 
 #include <cassert>
+#include <filesystem>
 #include <functional>
 #include <limits>
 #include <map>
@@ -31,8 +32,80 @@
 namespace ListColoring {
 namespace {
 
-ODDs::ODD firstRowODD(const ProblemInstance& instance) {
-    ODDs::ODDBuilder builder(1);
+/**
+ * @brief Incapsulates all operations with ODDs depending on selected mode.
+ */
+class ODDOperationsManager {
+public:
+    virtual ~ODDOperationsManager() = default;
+
+    virtual ODDs::ODDBuilder rowBuilder(int rowId, int leftStates) = 0;
+    virtual ODDs::ODD lazyPowerSet(int rowId, const ODDs::ODD& odd) = 0;
+    virtual ODDs::ODD minimize(int rowId, const ODDs::ODD& odd) = 0;
+};
+
+class MemoryManager : public ODDOperationsManager {
+public:
+    virtual ~MemoryManager() = default;
+
+    virtual ODDs::ODDBuilder rowBuilder(int, int leftStates) override {
+        return ODDs::ODDBuilder(leftStates);
+    }
+
+    virtual ODDs::ODD lazyPowerSet(int, const ODDs::ODD& odd) override {
+        return ODDs::diagramLazyPowerSet(odd);
+    }
+
+    virtual ODDs::ODD minimize(int, const ODDs::ODD& odd) override {
+        return ODDs::minimize(odd);
+    }
+};
+
+class DiskManager : public ODDOperationsManager {
+public:
+    DiskManager(const std::string& workDir)
+        : workDir_(workDir)
+    {}
+
+    virtual ~DiskManager() = default;
+
+    virtual ODDs::ODDBuilder rowBuilder(int rowId, int leftStates) override {
+        namespace fs = std::filesystem;
+        std::string layerPath = fs::path(workDir_) / layerDirName(rowId);
+        return ODDs::ODDBuilder(leftStates, layerPath);
+    }
+
+    virtual ODDs::ODD lazyPowerSet(int rowId, const ODDs::ODD& odd) override {
+        namespace fs = std::filesystem;
+        std::string detPath = fs::path(workDir_) / detDirName(rowId);
+        return ODDs::diagramLazyPowerSet(odd, detPath);
+    }
+
+    virtual ODDs::ODD minimize(int rowId, const ODDs::ODD& odd) override {
+        namespace fs = std::filesystem;
+        std::string tempPath = fs::path(workDir_) / "temp";
+        std::string minPath = fs::path(workDir_) / minDirName(rowId);
+        return ODDs::minimize(odd, minPath, tempPath);
+    }
+
+private:
+    static std::string layerDirName(int rowId) {
+        return "layer" + std::to_string(rowId);
+    }
+
+    static std::string detDirName(int rowId) {
+        return "layer" + std::to_string(rowId)  + "_det";
+    }
+
+    static std::string minDirName(int rowId) {
+        return "layer" + std::to_string(rowId) + "_min";
+    }
+
+    std::string workDir_;
+};
+
+ODDs::ODD firstRowODD(const ProblemInstance& instance, ODDOperationsManager& manager) {
+    ODDs::ODDBuilder builder = manager.rowBuilder(0, 1);
     builder.setInitialStates({0});
     ODDs::ODD::TransitionContainer firstTransitions;
     int firstAlphabetSize = instance.intermediateColors(0, 0).symbols().size();
@@ -184,8 +257,9 @@ StateStorage expandLayer(const ProblemInstance& instance,
 
 ODDs::ODD nextRow(const ProblemInstance& instance,
                   const ODDs::ODD& odd,
-                  int i) {
-    ODDs::ODDBuilder builder(1);
+                  int i,
+                  ODDOperationsManager& manager) {
+    ODDs::ODDBuilder builder = manager.rowBuilder(i, 1);
     builder.setInitialStates({0});
     StateStorage map = expandLeftLayer(instance, odd, builder, i);
     for (int j = 1; j < instance.width(); j++) {
@@ -360,11 +434,13 @@ public:
     Impl(const ProblemInstance& instance)
         : instance_(instance)
         , stats_(std::make_unique<ValueStatsStorage<MockSolverStats>>())
+        , manager_(std::make_unique<MemoryManager>())
     {}
 
     Impl(const ProblemInstance& instance, SolverStatsBase& stats)
         : instance_(instance)
         , stats_(std::make_unique<RefStatsStorage>(stats))
+        , manager_(std::make_unique<MemoryManager>())
     {}
 
     ~Impl() = default;
@@ -373,6 +449,10 @@ public:
     Impl(Impl&&) = default;
     Impl& operator=(Impl&&) = default;
 
+    void diskMode(const std::string& dirName) {
+        manager_.reset(new DiskManager(dirName));
+    }
+
     bool isThereSolution() {
         for (int i = 0; i < instance_.get().height(); i++) {
             for (int j = 0; j < instance_.get().width(); j++) {
@@ -380,9 +460,10 @@ public:
                     return false;
             }
         }
-        addODD(firstRowODD(instance_));
+        addODD(0, firstRowODD(instance_, *manager_));
         for (int i = 1; i < instance_.get().height(); i++) {
-            addODD(nextRow(instance_, odds_.back(), i));
+            addODD(i, nextRow(instance_, odds_.back(), i, *manager_));
+            odds_[i - 1].unload();
         }
         return !odds_.back().finalStates().empty();
     }
@@ -391,6 +472,7 @@ public:
         Solution ret(instance_.get().height(), instance_.get().width());
         LastPathSearcher lastPathSearcher(odds_.back());
         bool success = lastPathSearcher.find();
+        odds_.back().unload();
         assert(success);
         ODDPath path = lastPathSearcher.path;
         insertPath(ret, instance_.get().height() - 1, path);
@@ -398,6 +480,7 @@ public:
             IntermediatePathSearcher searcher(odds_[i], path, instance_.get(), i);
             success = searcher.find();
             assert(success);
+            odds_[i].unload();
             path = searcher.path;
             insertPath(ret, i, path);
         }
@@ -407,13 +490,14 @@ public:
 private:
     std::reference_wrapper<const ProblemInstance> instance_;
     std::unique_ptr<StatsStorageBase> stats_;
+    std::unique_ptr<ODDOperationsManager> manager_;
     std::vector<ODDs::ODD> odds_;
 
-    void addODD(ODDs::ODD&& odd) {
+    void addODD(int i, ODDs::ODD&& odd) {
         stats_->get().onRawODD(odd);
-        odd = ODDs::diagramLazyPowerSet(odd);
+        odd = manager_->lazyPowerSet(i, odd);
         stats_->get().onDeterminateODD(odd);
-        odd = ODDs::minimize(odd);
+        odd = manager_->minimize(i, odd);
         stats_->get().onMinimizedODD(odd);
         odds_.push_back(std::move(odd));
     }
@@ -442,6 +526,10 @@ Solver::~Solver() = default;
 Solver::Solver(Solver&&) = default;
 
 Solver& Solver::operator=(Solver&&) = default;
+
+void Solver::diskMode(const std::string& dirName) {
+    impl_->diskMode(dirName);
+}
 
 bool Solver::isThereSolution() {
     return impl_->isThereSolution();

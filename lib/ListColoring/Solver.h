@@ -92,6 +92,17 @@ public:
     Solver& operator=(Solver&&);
 
     /**
+     * @brief Switch solver to disk mode.
+     *
+     * In disk mode, the solver operates disk-mode ODDs, which are much slower
+     * but much less memory-consuming, as only one layer of one ODD is stored
+     * in memory.
+     *
+     * @param dirName Path to the working directory.
+     */
+    void diskMode(const std::string& dirName);
+
+    /**
      * @brief Checks an instance on solution existence.
      */
     bool isThereSolution();

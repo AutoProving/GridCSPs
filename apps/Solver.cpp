@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cxxopts.hpp>
+
 #include <ListColoring/ListColoring.h>
 #include <ListColoring/LegacyReader.h>
 #include <ListColoring/Solver.h>
@@ -25,46 +27,12 @@
 
 #include <cassert>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <set>
 
 namespace {
-
-/**
- * XXX: The only reason why a library isn't used for this reason is that the
- * usecase is way too simple for adding external dependencies. In future, if
- * this class will need more functionality, better switch to an external
- * library.
- */
-class ArgumentParser {
-public:
-    class BadArgument : public std::runtime_error {
-    public:
-        BadArgument(const std::string& message)
-            : std::runtime_error(message)
-        {}
-    };
-
-    ArgumentParser() = default;
-    ~ArgumentParser() = default;
-
-    void parse(int argc, char* argv[]) {
-        for (int i = 1; i < argc; i++) {
-            if (std::strlen(argv[i]) < 2 || std::strncmp(argv[i], "--", 2)) {
-                throw BadArgument("Arguments should start with '--'");
-            }
-            flags_.insert(argv[i] + 2);
-        }
-    }
-
-    bool isSet(const std::string& name) {
-        return flags_.count(name);
-    }
-
-private:
-    std::set<std::string> flags_;
-};
 
 int width(const ODDs::ODD& odd) {
     int ret = 0;
@@ -113,9 +81,14 @@ private:
     std::vector<int> minWidths_;
 };
 
-int justSolve(const ListColoring::ProblemInstance& pi, bool quiet) {
+int justSolve(const ListColoring::ProblemInstance& pi,
+              bool quiet,
+              const std::string& dirName) {
     SolverStats stats;
     ListColoring::Solver solver(pi, stats);
+    if (!dirName.empty()) {
+        solver.diskMode(dirName);
+    }
     if (!solver.isThereSolution()) {
         std::cout << "No solution" << std::endl;
     } else {
@@ -223,20 +196,28 @@ int reduceAndSolve(const ListColoring::ProblemInstance& pi, bool quiet) {
 }
 
 int main(int argc, char* argv[]) {
-    ArgumentParser args;
-    try {
-        args.parse(argc, argv);
-    } catch (ArgumentParser::BadArgument& e) {
-        std::cerr << e.what() << std::endl;
-        return 2;
+    cxxopts::Options options("solver", "A List Coloring solver");
+
+    options.add_options()
+        ("q,quiet", "Quiet mode")
+        ("r,reduce-space", "Use space reductions")
+        ("d,dir", "Directory for disk mode ODDs",
+                  cxxopts::value<std::string>()->default_value(""))
+        ("h,help", "Print help")
+    ;
+    auto args = options.parse(argc, argv);
+    if (args.count("help")) {
+        std::cout << options.help() << std::endl;
+        return 0;
     }
 
     ListColoring::ProblemInstance pi = ListColoring::Legacy::read(std::cin);
 
-    bool quiet = args.isSet("quiet");
-    if (args.isSet("reduce-space")) {
+    bool quiet = args.count("quiet");
+    std::string dirName = args["dir"].as<std::string>();
+    if (args.count("reduce-space")) {
         return reduceAndSolve(pi, quiet);
     } else {
-        return justSolve(pi, quiet);
+        return justSolve(pi, quiet, dirName);
     }
 }
