@@ -307,7 +307,7 @@ private:
 class ODDPathProducer : public Producer<std::vector<int>> {
 public:
     ODDPathProducer(ODDs::ODD&& odd)
-        : odd_(odd)
+        : odd_(std::move(odd))
     {
         auto range = odd_.getLayer(0).transitions.proceedFrom(0);
         pos_ = {range.begin()};

@@ -415,7 +415,7 @@ private:
         stats_->get().onDeterminateODD(odd);
         odd = ODDs::minimize(odd);
         stats_->get().onMinimizedODD(odd);
-        odds_.push_back(odd);
+        odds_.push_back(std::move(odd));
     }
 
     void insertPath(Solution& s, int row, const ODDPath& path) {
