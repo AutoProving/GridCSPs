@@ -44,8 +44,25 @@ After that, it prints the statistics: width of ODDs used in each row of the ints
 
 The solver also accepts command line arguments:
 
-* If `--quiet` flag is passed, the solver only prints the solution without the statistics.
-* If `--reduce-space` flag is passed, the solver attempts to reduce the space consumption (might be reasonable for almost-square images)
+* If `--quiet` or `-q` flag is passed, the solver only prints the solution without the statistics.
+* If `--reduce-space` or `-r` flag is passed, the solver attempts to reduce the space consumption (might be reasonable for almost-square images)
+
+### Disk mode
+
+In disk mode, the solver saves intermediate ODDs to the specified directory instead of storing them in memory. This way, it consumes linear memory instead of cubic, but works 5-10 times slower (tested on a MacBook with SSD).
+
+In order to enable disk mode one must provide an empty directory to store the execution data:
+
+```
+$ ./Solver -d /tmp/solver < instance.txt
+```
+
+If the execution in disk mode was interrupted in the middle, it can continue from the point of interruption, if flag  `-c` or `--continue` is passed.
+
+```
+$ ./Solver -c -d /tmp/solver < instance.txt
+Continuing interrupted execution from row 22
+```
 
 ## Building documentation
 

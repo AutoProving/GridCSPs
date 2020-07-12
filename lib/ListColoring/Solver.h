@@ -106,7 +106,7 @@ public:
      * @brief Continue execution from an interrupted disk-mode process.
      *
      * Load saved complete ODDs for the intermediate layers. The execution for
-     * isThereSolution will start from building the ODD that was under
+     * isThereSolution() will start from building the ODD that was under
      * construction at the moment of interuption.
      *
      * Switches solver to disk mode in case no execution data can be found in
@@ -129,7 +129,7 @@ public:
     bool isThereSolution();
 
     /**
-     * @brief Build first k ODDs in the isThereSolution algorithm.
+     * @brief Build first k ODDs in the isThereSolution() algorithm.
      *
      * Detaches ODDs after performing the steps.
      *
@@ -140,7 +140,7 @@ public:
     /**
      * @brief Restores a solution after the check if it exists.
      *
-     * The behaviour is undefined in case it's called before isThereSolution.
+     * The behaviour is undefined in case it's called before isThereSolution().
      */
     Solution restoreSolution() const;
 
