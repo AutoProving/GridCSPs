@@ -200,6 +200,32 @@ TEST(SolverTest, pigeonhole_10_10_disk) {
     ASSERT_TRUE(solver.isThereSolution());
 }
 
+TEST(SolverTest, pigeonhole_10_10_interrupted) {
+    namespace fs = std::filesystem;
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 10);
+    TempDir tmp;
+    {
+        ListColoring::Solver solver(instance);
+        solver.diskMode(tmp.path());
+        solver.firstSteps(5);
+    }
+    ASSERT_TRUE(fs::exists(fs::path(tmp.path()) / "layer4_min"));
+    ASSERT_FALSE(fs::exists(fs::path(tmp.path()) / "layer5_min"));
+    ListColoring::Solver solver(instance);
+    solver.continueInterrupted(tmp.path());
+    ASSERT_EQ(5, solver.startFrom());
+    ASSERT_TRUE(solver.isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_10_10_immediatelyInterrupted) {
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 10);
+    ListColoring::Solver solver(instance);
+    TempDir tmp;
+    solver.continueInterrupted(tmp.path());
+    ASSERT_EQ(0, solver.startFrom());
+    ASSERT_TRUE(solver.isThereSolution());
+}
+
 TEST(SolverTest, pigeonhole_5_15) {
     ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(5, 15);
     ASSERT_TRUE(ListColoring::Solver(instance).isThereSolution());
@@ -210,6 +236,23 @@ TEST(SolverTest, pigeonhole_5_15_disk) {
     ListColoring::Solver solver(instance);
     TempDir tmp;
     solver.diskMode(tmp.path());
+    ASSERT_TRUE(solver.isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_5_15_interrupted) {
+    namespace fs = std::filesystem;
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(5, 15);
+    TempDir tmp;
+    {
+        ListColoring::Solver solver(instance);
+        solver.diskMode(tmp.path());
+        solver.firstSteps(2);
+    }
+    ASSERT_TRUE(fs::exists(fs::path(tmp.path()) / "layer1_min"));
+    ASSERT_FALSE(fs::exists(fs::path(tmp.path()) / "layer2_min"));
+    ListColoring::Solver solver(instance);
+    solver.continueInterrupted(tmp.path());
+    ASSERT_EQ(2, solver.startFrom());
     ASSERT_TRUE(solver.isThereSolution());
 }
 
@@ -226,6 +269,23 @@ TEST(SolverTest, pigeonhole_15_5_disk) {
     ASSERT_FALSE(solver.isThereSolution());
 }
 
+TEST(SolverTest, pigeonhole_15_5_interrupted) {
+    namespace fs = std::filesystem;
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(15, 5);
+    TempDir tmp;
+    {
+        ListColoring::Solver solver(instance);
+        solver.diskMode(tmp.path());
+        solver.firstSteps(5);
+    }
+    ASSERT_TRUE(fs::exists(fs::path(tmp.path()) / "layer4_min"));
+    ASSERT_FALSE(fs::exists(fs::path(tmp.path()) / "layer5_min"));
+    ListColoring::Solver solver(instance);
+    solver.continueInterrupted(tmp.path());
+    ASSERT_EQ(5, solver.startFrom());
+    ASSERT_FALSE(solver.isThereSolution());
+}
+
 TEST(SolverTest, pigeonhole_10_9) {
     ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 9);
     ASSERT_FALSE(ListColoring::Solver(instance).isThereSolution());
@@ -236,6 +296,23 @@ TEST(SolverTest, pigeonhole_10_9_disk) {
     ListColoring::Solver solver(instance);
     TempDir tmp;
     solver.diskMode(tmp.path());
+    ASSERT_FALSE(solver.isThereSolution());
+}
+
+TEST(SolverTest, pigeonhole_10_9_interrupted) {
+    namespace fs = std::filesystem;
+    ListColoring::ProblemInstance instance = ListColoring::pigeonholeTest(10, 9);
+    TempDir tmp;
+    {
+        ListColoring::Solver solver(instance);
+        solver.diskMode(tmp.path());
+        solver.firstSteps(5);
+    }
+    ASSERT_TRUE(fs::exists(fs::path(tmp.path()) / "layer4_min"));
+    ASSERT_FALSE(fs::exists(fs::path(tmp.path()) / "layer5_min"));
+    ListColoring::Solver solver(instance);
+    solver.continueInterrupted(tmp.path());
+    ASSERT_EQ(5, solver.startFrom());
     ASSERT_FALSE(solver.isThereSolution());
 }
 

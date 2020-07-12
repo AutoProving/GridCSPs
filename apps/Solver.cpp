@@ -83,11 +83,19 @@ private:
 
 int justSolve(const ListColoring::ProblemInstance& pi,
               bool quiet,
-              const std::string& dirName) {
+              const std::string& dirName,
+              bool continueExecution) {
     SolverStats stats;
     ListColoring::Solver solver(pi, stats);
     if (!dirName.empty()) {
-        solver.diskMode(dirName);
+        if (continueExecution) {
+            solver.continueInterrupted(dirName);
+            if (!quiet) {
+                std::cerr << "Continuing interrupted execution from row " << solver.startFrom() << std::endl;
+            }
+        } else {
+            solver.diskMode(dirName);
+        }
     }
     if (!solver.isThereSolution()) {
         std::cout << "No solution" << std::endl;
@@ -203,6 +211,7 @@ int main(int argc, char* argv[]) {
         ("r,reduce-space", "Use space reductions")
         ("d,dir", "Directory for disk mode ODDs",
                   cxxopts::value<std::string>()->default_value(""))
+        ("c,continue", "Continue interrupted execution in the same directory")
         ("h,help", "Print help")
     ;
     auto args = options.parse(argc, argv);
@@ -214,10 +223,15 @@ int main(int argc, char* argv[]) {
     ListColoring::ProblemInstance pi = ListColoring::Legacy::read(std::cin);
 
     bool quiet = args.count("quiet");
+    bool continueExecution = args.count("continue");
     std::string dirName = args["dir"].as<std::string>();
+    if (continueExecution && dirName.empty()) {
+        std::cerr << "Directory name must not be empty in the continue-execution mode" << std::endl;
+        return 2;
+    }
     if (args.count("reduce-space")) {
         return reduceAndSolve(pi, quiet);
     } else {
-        return justSolve(pi, quiet, dirName);
+        return justSolve(pi, quiet, dirName, continueExecution);
     }
 }

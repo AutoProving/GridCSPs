@@ -25,6 +25,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <limits>
 #include <map>
@@ -42,6 +43,7 @@ public:
     virtual ODDs::ODDBuilder rowBuilder(int rowId, int leftStates) = 0;
     virtual ODDs::ODD lazyPowerSet(int rowId, const ODDs::ODD& odd) = 0;
     virtual ODDs::ODD minimize(int rowId, const ODDs::ODD& odd) = 0;
+    virtual void reportLayer(int rowId) = 0;
 };
 
 class MemoryManager : public ODDOperationsManager {
@@ -59,6 +61,8 @@ public:
     virtual ODDs::ODD minimize(int, const ODDs::ODD& odd) override {
         return ODDs::minimize(odd);
     }
+
+    virtual void reportLayer(int) override {}
 };
 
 class DiskManager : public ODDOperationsManager {
@@ -86,6 +90,32 @@ public:
         std::string tempPath = fs::path(workDir_) / "temp";
         std::string minPath = fs::path(workDir_) / minDirName(rowId);
         return ODDs::minimize(odd, minPath, tempPath);
+    }
+
+    virtual void reportLayer(int rowId) override {
+        namespace fs = std::filesystem;
+        std::string reportPath = fs::path(workDir_) / "layer.txt";
+        std::ofstream fout(reportPath);
+        fout << rowId;
+    }
+
+    std::optional<int> nextRowToProcess() {
+        namespace fs = std::filesystem;
+        std::string reportPath = fs::path(workDir_) / "layer.txt";
+        if (!fs::exists(reportPath)) {
+            return {};
+        }
+        std::ifstream fin(reportPath);
+        int rowId;
+        if (!(fin >> rowId)) {
+            return {};
+        }
+        return rowId + 1;
+    }
+
+    std::string layerMinDirName(int rowId) {
+        namespace fs = std::filesystem;
+        return fs::path(workDir_) / minDirName(rowId);
     }
 
 private:
@@ -453,19 +483,60 @@ public:
         manager_.reset(new DiskManager(dirName));
     }
 
-    bool isThereSolution() {
-        for (int i = 0; i < instance_.get().height(); i++) {
-            for (int j = 0; j < instance_.get().width(); j++) {
-                if (instance_.get().intermediateColors(i, j).symbols().empty())
-                    return false;
-            }
+    void continueInterrupted(const std::string& dirName) {
+        DiskManager* manager = new DiskManager(dirName);
+        auto toContinue = manager->nextRowToProcess();
+        if (!toContinue.has_value()) {
+            diskMode(dirName);
+            return;
         }
-        addODD(0, firstRowODD(instance_, *manager_));
-        for (int i = 1; i < instance_.get().height(); i++) {
+        startFrom_ = toContinue.value();
+        for (int i = 0; i < startFrom_; i++) {
+            auto odd = ODDs::readFromDirectory(manager->layerMinDirName(i));
+            if (!odd.has_value()) {
+                startFrom_ = i;
+                manager_.reset(manager);
+                return;
+            }
+            odds_.emplace_back(std::move(odd.value()));
+        }
+        manager_.reset(manager);
+    }
+
+    int startFrom() const {
+        return startFrom_;
+    }
+
+    bool isThereSolution() {
+        if (!nonEmptyColors()) {
+            return false;
+        }
+        if (startFrom_ == 0) {
+            addODD(0, firstRowODD(instance_, *manager_));
+            startFrom_ = 1;
+        }
+        for (int i = startFrom_; i < instance_.get().height(); i++) {
             addODD(i, nextRow(instance_, odds_.back(), i, *manager_));
             odds_[i - 1].unload();
         }
         return !odds_.back().finalStates().empty();
+    }
+
+    void firstSteps(int k) {
+        if (!nonEmptyColors()) {
+            return;
+        }
+        if (startFrom_ == 0) {
+            addODD(0, firstRowODD(instance_, *manager_));
+            startFrom_ = 1;
+        }
+        for (int i = startFrom_; i < k; i++) {
+            addODD(i, nextRow(instance_, odds_.back(), i, *manager_));
+            odds_[i - 1].unload();
+        }
+        for (int i = 0; i < k; i++) {
+            odds_[i].detachDir();
+        }
     }
 
     Solution restoreSolution() {
@@ -492,6 +563,7 @@ private:
     std::unique_ptr<StatsStorageBase> stats_;
     std::unique_ptr<ODDOperationsManager> manager_;
     std::vector<ODDs::ODD> odds_;
+    int startFrom_ = 0;
 
     void addODD(int i, ODDs::ODD&& odd) {
         stats_->get().onRawODD(odd);
@@ -500,6 +572,7 @@ private:
         odd = manager_->minimize(i, odd);
         stats_->get().onMinimizedODD(odd);
         odds_.push_back(std::move(odd));
+        manager_->reportLayer(i);
     }
 
     void insertPath(Solution& s, int row, const ODDPath& path) {
@@ -510,6 +583,16 @@ private:
             ODDs::ODD::Symbol finalColor = colorMap[intermediateColor];
             s.get(row, column) = finalColors.numberToSymbol(finalColor);
         }
+    }
+
+    bool nonEmptyColors() {
+        for (int i = 0; i < instance_.get().height(); i++) {
+            for (int j = 0; j < instance_.get().width(); j++) {
+                if (instance_.get().intermediateColors(i, j).symbols().empty())
+                    return false;
+            }
+        }
+        return true;
     }
 };
 
@@ -531,8 +614,20 @@ void Solver::diskMode(const std::string& dirName) {
     impl_->diskMode(dirName);
 }
 
+void Solver::continueInterrupted(const std::string& dirName) {
+    impl_->continueInterrupted(dirName);
+}
+
+int Solver::startFrom() const {
+    return impl_->startFrom();
+}
+
 bool Solver::isThereSolution() {
     return impl_->isThereSolution();
+}
+
+void Solver::firstSteps(int k) {
+    impl_->firstSteps(k);
 }
 
 Solution Solver::restoreSolution() const {

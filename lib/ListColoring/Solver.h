@@ -103,9 +103,39 @@ public:
     void diskMode(const std::string& dirName);
 
     /**
+     * @brief Continue execution from an interrupted disk-mode process.
+     *
+     * Load saved complete ODDs for the intermediate layers. The execution for
+     * isThereSolution will start from building the ODD that was under
+     * construction at the moment of interuption.
+     *
+     * Switches solver to disk mode in case no execution data can be found in
+     * the provided dir (for instance, if the process was interrupted before
+     * the first ODD was constructed).
+     */
+    void continueInterrupted(const std::string& dirName);
+
+    /**
+     * @brief Get the first row from which the execution will start.
+     *
+     * Needed for testing purposes to ensure that the execution context from
+     * an interrupted process is restored.
+     */
+    int startFrom() const;
+
+    /**
      * @brief Checks an instance on solution existence.
      */
     bool isThereSolution();
+
+    /**
+     * @brief Build first k ODDs in the isThereSolution algorithm.
+     *
+     * Detaches ODDs after performing the steps.
+     *
+     * Needed for testing purposes.
+     */
+    void firstSteps(int k);
 
     /**
      * @brief Restores a solution after the check if it exists.
