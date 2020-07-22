@@ -4,11 +4,9 @@ A List Coloring solver.
 
 ## Build instructions
 
-External dependencies of the library are exported as git submodules in `ext/` subdirectory. There are several dependencies.
+External dependencies of the library are exported as git submodules in `ext/` subdirectory.
 
-* [Google Test](https://github.com/google/googletest/) framework is used for unit tests.
 * [ODDs](https://github.com/mateusoliveiraoliveira/ODDs) is used by solver, as it heavily exploits Ordered Decision Diagrams.
-* [cxxopts](https://github.com/jarro2783/cxxopts/) library is used to parse command line arguments.
 
 To clone the dependencies to supposed locations, just type the following command after cloning this repository.
 
