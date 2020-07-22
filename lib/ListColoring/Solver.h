@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// Copyright (c) 2019-2020 Vasily Alferov, Mateus de Oliveira Oliveira and Contributors.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -92,14 +92,55 @@ public:
     Solver& operator=(Solver&&);
 
     /**
+     * @brief Switch solver to disk mode.
+     *
+     * In disk mode, the solver operates disk-mode ODDs, which are much slower
+     * but much less memory-consuming, as only one layer of one ODD is stored
+     * in memory.
+     *
+     * @param dirName Path to the working directory.
+     */
+    void diskMode(const std::string& dirName);
+
+    /**
+     * @brief Continue execution from an interrupted disk-mode process.
+     *
+     * Load saved complete ODDs for the intermediate layers. The execution for
+     * isThereSolution() will start from building the ODD that was under
+     * construction at the moment of interuption.
+     *
+     * Switches solver to disk mode in case no execution data can be found in
+     * the provided dir (for instance, if the process was interrupted before
+     * the first ODD was constructed).
+     */
+    void continueInterrupted(const std::string& dirName);
+
+    /**
+     * @brief Get the first row from which the execution will start.
+     *
+     * Needed for testing purposes to ensure that the execution context from
+     * an interrupted process is restored.
+     */
+    int startFrom() const;
+
+    /**
      * @brief Checks an instance on solution existence.
      */
     bool isThereSolution();
 
     /**
+     * @brief Build first k ODDs in the isThereSolution() algorithm.
+     *
+     * Detaches ODDs after performing the steps.
+     *
+     * Needed for testing purposes.
+     */
+    void firstSteps(int k);
+
+    /**
      * @brief Restores a solution after the check if it exists.
      *
-     * The behaviour is undefined in case it's called before isThereSolution.
+     * The behaviour is undefined in case it's called before isThereSolution().
      */
     Solution restoreSolution() const;
 

@@ -27,6 +27,7 @@ target_link_libraries(IsThereSolution PUBLIC ListColoring)
 
 add_executable(Solver apps/Solver.cpp)
 target_include_directories(Solver PUBLIC lib/)
+target_include_directories(Solver PUBLIC ext/cxxopts/include/)
 target_compile_options(Solver PRIVATE -Wall -Wextra -Wshadow)
 target_link_libraries(Solver PUBLIC ListColoring)
 

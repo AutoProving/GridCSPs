@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 Mateus de Oliveira Oliveira and Contributors. 
+// Copyright (c) 2019-2020 Vasily Alferov, Mateus de Oliveira Oliveira and Contributors.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -307,7 +307,7 @@ private:
 class ODDPathProducer : public Producer<std::vector<int>> {
 public:
     ODDPathProducer(ODDs::ODD&& odd)
-        : odd_(odd)
+        : odd_(std::move(odd))
     {
         auto range = odd_.getLayer(0).transitions.proceedFrom(0);
         pos_ = {range.begin()};
