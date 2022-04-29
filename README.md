@@ -1,6 +1,10 @@
-# ListColoring
+# GridCSP 
 
-A List Coloring solver.
+This is a solver for Grid-like constraint satisfaction problems (CSPs). The solver works in polynomial time on the smoothness of the input instance. Smoothness is a complexity measure defined in terms of ordered decision diagrams (ODDs). For more details please refer to the following publication. 
+
+Vasily Alferov and Mateus de Oliveira Oliveira. On the Satisfiability of Smooth Grid CSPs.
+Proceedings of the 20th Symposium on Experimental Algorithms (SEA 2022).
+
 
 ## Build instructions
 
